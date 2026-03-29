@@ -16,7 +16,6 @@ async def get_current_user(db: Session = Depends(get_db), token: str = Depends(o
         detail="Não foi possível validar as credenciais",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
     payload = Security.decode_token(token)
     if payload is None:
         raise credentials_exception
@@ -48,7 +47,7 @@ def verificar_perfil(perfis_permitidos: List[str]):
         if current_user.tipo.value.upper() not in [p.upper() for p in perfis_permitidos]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Operação permitida apenas para: {','.join(perfis_permitidos)}"
+                detail=f"Operação permitida apenas para {','.join(perfis_permitidos)}"
             )
         return current_user
     return role_checker
