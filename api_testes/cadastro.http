@@ -4,8 +4,9 @@ POST http://localhost:8000/api/v1/auth/register HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "adminjoao@email.com",
-  "nome": "Admin João",
+  "email": "alunoroberto@email.com",
+  "matricula": "78458430",
+  "nome": "Aluno Roberto",
   "senha": "123456",
-  "tipo": "ADMIN"
+  "tipo": "ALUNO"
 }
