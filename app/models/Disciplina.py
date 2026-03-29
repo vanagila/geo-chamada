@@ -10,4 +10,4 @@ class Disciplina(Base):
     codigo = Column(String(20), unique=True, nullable=False)
     descricao = Column(String(500))
 
-    turmas = relationship("Turma", back_populates="disciplinas")
+    turmas = relationship("Turma", back_populates="disciplina")

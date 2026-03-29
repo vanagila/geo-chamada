@@ -23,4 +23,4 @@ class Chamada(Base):
 
     turma = relationship("Turma", back_populates="chamadas")
     professor = relationship("Usuario", back_populates="chamadas_abertas")
-    presencas = relationship("Presenca", back_populates="chamadas")
+    presencas = relationship("Presenca", back_populates="chamada")

@@ -31,4 +31,4 @@ class Turma(Base):
     disciplina = relationship("Disciplina", back_populates="turmas")
     professores = relationship("Usuario", secondary=turma_professor)
     alunos = relationship("Usuario", secondary=turma_aluno)
-    chamadas = relationship("Chamadas", back_populates="turma")
+    chamadas = relationship("Chamada", back_populates="turma")
