@@ -29,4 +29,4 @@ class Presenca(Base):
 
     aluno = relationship("Usuario", back_populates="presencas", foreign_keys=[aluno_id])
     chamada = relationship("Chamada", back_populates="presencas")
-    abonado_por = relationship("Usuario", back_populates="chamadas_abonadas", foreign_keys=[abonado_por_id])
+    abonado_por = relationship("Usuario", back_populates="faltas_abonadas", foreign_keys=[abonado_por_id])

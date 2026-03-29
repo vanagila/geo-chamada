@@ -7,23 +7,24 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from app.core.config import settings
 from app.core.database import Base
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-if not DATABASE_URL:
-    DATABASE_URL = "postgresql+psycopg://vanagila:postgresql@localhost:5432/geo_chamada"
-
 from app.core.database import Base
 from app.models.Usuario import Usuario
 from app.models.Disciplina import Disciplina
 from app.models.Turma import Turma
 from app.models.Chamada import Chamada
 from app.models.Presenca import Presenca
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    DATABASE_URL = "postgresql+psycopg://vanagila:postgresql@localhost:5432/geo_chamada"
 
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
