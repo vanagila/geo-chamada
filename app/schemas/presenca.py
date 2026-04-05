@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 from enum import Enum
+from app.schemas.chamada import Coordenadas
 
 class PresencaStatus(str, Enum):
     PRESENTE = "PRESENTE"
@@ -12,8 +13,8 @@ class PresencaBase(BaseModel):
     chamada_id: int
 
 class PresencaCreate(PresencaBase):
-    coordenadas: dict
-
+    coordenadas: Coordenadas
+ 
 class PresencaUpdate(BaseModel):
     status: Optional[PresencaStatus] = None
 
