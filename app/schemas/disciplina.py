@@ -15,7 +15,14 @@ class DisciplinaUpdate(BaseModel):
 
 class DisciplinaResponse(DisciplinaBase):
     id: int
-    turmas_count: Optional[int] = 0 
+    turmas_count: Optional[int] = 0
+
+    class Config:
+        from_attributes = True
+
+class DisciplinaMessage(BaseModel):
+    message: str
+    turma: DisciplinaResponse
 
     class Config:
         from_attributes = True

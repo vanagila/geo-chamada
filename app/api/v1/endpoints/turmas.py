@@ -5,6 +5,7 @@ from app.core.database import get_db
 from app.api.deps import get_current_active_user, verificar_perfil
 from app.models.Usuario import Usuario
 from app.schemas.turma import TurmaCreate, TurmaUpdate, TurmaResponse, TurmaMessage
+from app.schemas.msg import Msg
 from app.services.turma_service import TurmaService
 
 router = APIRouter()
@@ -23,7 +24,7 @@ def criar_turma(
 def listar_turmas(
     *, db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_active_user),
-    skip: int = 0, limit: int = 0
+    skip: int = 0, limit: int = 100
 ) -> Any:
     service = TurmaService(db)
     turmas = service.get_all_turmas(skip, limit)
@@ -82,14 +83,14 @@ def atualizar_turma(
     turma = service.update_turma(turma_id, turma_data)
     return turma
 
-@router.delete("/{turma_id}", response_model=TurmaMessage)
+@router.delete("/{turma_id}", response_model=Msg)
 def deletar_turma(
     *, db: Session = Depends(get_db),
     turma_id: int,
     current_user: Usuario = Depends(verificar_perfil(["ADMIN"]))
 ) -> Any:
     service = TurmaService(db)
-    return service.deletar_turma(turma_id)
+    return service.delete_turma(turma_id)
 
 @router.post("/{turma_id}/professores/{professor_id}", response_model=TurmaMessage)
 def adicionar_professor_turma(

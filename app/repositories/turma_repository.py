@@ -37,7 +37,7 @@ class TurmaRepository:
         ).filter(Turma.id == turma_id).first()
 
     def get_by_codigo(self, codigo: str) -> Optional[Turma]:
-        return self.db.query(Turma).filter(Turma.codigo = codigo).first()
+        return self.db.query(Turma).filter(Turma.codigo == codigo).first()
 
     def get_by_professor(self, professor_id: int, skip: int = 0, limit: int = 100) -> List[Turma]:
         return self.db.query(Turma).join(Turma.professores).filter(

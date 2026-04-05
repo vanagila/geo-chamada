@@ -4,6 +4,7 @@ from typing import List, Any, Optional
 from app.core.database import get_db
 from app.models.Usuario import Usuario, UserType
 from app.schemas.usuario import UsuarioResponse, UsuarioUpdate, UsuarioMessage
+from app.schemas.msg import Msg
 from app.services.usuario_service import UsuarioService
 from app.api.deps import get_current_active_user, verificar_perfil
 
@@ -70,7 +71,7 @@ def deactivate_usuario(*, db: Session = Depends(get_db), usuario_id: int,
     usuario = service.deactivate_user(usuario_id)
     return usuario
 
-@router.delete("/{usuario_id}")
+@router.delete("/{usuario_id}", response_model=Msg)
 def delete_usuario(*, db: Session = Depends(get_db), usuario_id: int,
                    current_user: Usuario = Depends(verificar_perfil(["ADMIN"]))
 ) -> Any:

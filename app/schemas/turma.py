@@ -1,11 +1,11 @@
-from pydantic import BaseModel, Field
-from typing import Optional, List
+from pydantic import BaseModel, Field, model_validator
+from typing import Optional, List, Any
 from datetime import date, time
 from app.schemas.usuario import UsuarioResponse
 
 class TurmaBase(BaseModel):
     codigo: str = Field(..., max_length=20)
-    disciplina_id: id
+    disciplina_id: int
     semestre: str = Field(..., max_length=6)
     ano: int
     horario: time
@@ -27,6 +27,15 @@ class TurmaResponse(TurmaBase):
     disciplina_nome: Optional[str] = None
     professores: List[UsuarioResponse] = []
     alunos: List[UsuarioResponse] = []
+
+    @model_validator(mode="before")
+    @classmethod
+    def set_disciplina_nome(cls, data: Any) -> Any:
+        if hasattr(data, "disciplina") and data.disciplina:
+            data.disciplina_nome = data.disciplina.nome
+        elif isinstance(data, dict) and data.get("disciplina"):
+            data["disciplina_nome"] = data["disciplina"].nome
+        return data
 
     class Config:
         from_attributes = True

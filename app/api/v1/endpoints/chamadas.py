@@ -10,9 +10,11 @@ from app.services.chamada_service import ChamadaService
 router = APIRouter()
 
 @router.post("/", response_model=ChamadaResponse)
-def criar_chamada(db: Session = Depends(get_db),
-                  chamada_data: ChamadaCreate,
-                  current_user: Usuario = Depends(verificar_perfil(["PROFESSOR"])) -> Any:
+def criar_chamada(
+    *, db: Session = Depends(get_db),
+    chamada_data: ChamadaCreate,
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR"]))
+) -> Any:
     chamada_service = ChamadaService(db)
     try:
         chamada = chamada_service.abrir_chamada(chamada_data, current_user.id)
@@ -24,9 +26,11 @@ def criar_chamada(db: Session = Depends(get_db),
         )
 
 @router.post("{chamada_id}/encerrar")
-def fechar_chamada(db: Session = Depends(get_db),
-                   chamada_id: int,
-                   current_user: Usuario = Depends(verificar_perfil(["PROFESSOR"])) -> Any:
+def fechar_chamada(
+    *, db: Session = Depends(get_db),
+    chamada_id: int,
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR"]))
+) -> Any:
     chamada_service = ChamadaService(db)
     try:
         chamada = chamada_service.encerrar_chamada(chamada_id)
@@ -36,5 +40,3 @@ def fechar_chamada(db: Session = Depends(get_db),
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
-
-@router.get("")
