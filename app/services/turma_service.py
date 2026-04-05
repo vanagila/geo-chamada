@@ -3,6 +3,7 @@ from typing import List, Optional
 from fastapi import HTTPException, status
 from app.repositories.turma_repository import TurmaRepository
 from app.repositories.usuario_repository import UsuarioRepository
+from app.repositories.disciplina_repository import DisciplinaRepository
 from app.schemas.turma import TurmaCreate, TurmaUpdate
 from app.models.Turma import Turma
 
@@ -11,16 +12,26 @@ class TurmaService:
         self.db = db
         self.repository = TurmaRepository(db)
         self.usuario_repo = UsuarioRepository(db)
+        self.disciplina_repo = DisciplinaRepository(db)
 
     def create_turma(self, turma_data: TurmaCreate) -> Turma:
+        disciplina = self.disciplina_repo.get_by_id(turma_data.disciplina_id)
+        if not disciplina:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Disciplina não encontrada"
+            )
+
         if self.repository.get_by_codigo(turma_data.codigo):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Código de turma já cadastrado"
             )
-        return self.repository.create(turma_data)
+        nova_turma = self.repository.create(turma_data)
+        nova_turma.disciplina = disciplina
+        return nova_turma
 
-    def get_all_turmas(self, skip: int = 0, limit: int = 0) -> List[Turma]:
+    def get_all_turmas(self, skip: int = 0, limit: int = 100) -> List[Turma]:
         return self.repository.get_all(skip, limit)
 
     def get_turma_by_id(self, turma_id: int) -> Turma:
@@ -67,8 +78,8 @@ class TurmaService:
                 detail="Turma não encontrada"
             )
         return {
-            "message": "Turma atualizada com sucesso"
-            "turma:" turma
+            "message": "Turma atualizada com sucesso",
+            "turma": turma
         }
 
     def delete_turma(self, turma_id: int) -> dict:
@@ -87,8 +98,8 @@ class TurmaService:
             detail="Turma ou professor não encontrado"
         )
         return {
-            "message": "Professor adicionado com sucesso"
-            "turma:" turma
+            "message": "Professor adicionado com sucesso",
+            "turma": turma
         }
 
     def remove_professor_turma(self, turma_id: int, professor_id: int) -> dict:
@@ -99,8 +110,8 @@ class TurmaService:
             detail="Turma ou professor não encontrado"
         )
         return {
-            "message": "Professor removido com sucesso"
-            "turma:" turma
+            "message": "Professor removido com sucesso",
+            "turma": turma
         }
 
     def add_aluno_turma(self, turma_id: int, aluno_id: int) -> dict:
@@ -111,8 +122,8 @@ class TurmaService:
             detail="Turma ou aluno não encontrado"
         )
         return {
-            "message": "Aluno adicionado com sucesso"
-            "turma:" turma
+            "message": "Aluno adicionado com sucesso",
+            "turma": turma
         }
 
     def remove_aluno_turma(self, turma_id: int, aluno_id: int) -> dict:
@@ -123,6 +134,6 @@ class TurmaService:
             detail="Turma ou aluno não encontrado"
         )
         return {
-            "message": "Professor removido com sucesso"
-            "turma:" turma
+            "message": "Professor removido com sucesso",
+            "turma": turma
         }

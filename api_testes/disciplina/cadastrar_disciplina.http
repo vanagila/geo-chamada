@@ -1,0 +1,11 @@
+### 
+
+POST http://localhost:8000/api/v1/disciplinas/ HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5IiwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3NzUzNjM5Njl9.L73OT04Rucq9f99_ysRudqu5E53U_2_k8P0AdbY-cPc
+
+{
+  "codigo": "INF208",
+  "descricao": "Gerenciamento de processos, memória, sistemas de arquivos e entrada/saída em sistemas computacionais.",
+  "nome": "Sistemas Operacionais"
+}

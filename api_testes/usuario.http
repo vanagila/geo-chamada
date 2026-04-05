@@ -1,9 +1,0 @@
-### 
-
-PUT http://localhost:8000/api/v1/usuarios/2 HTTP/1.1
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4IiwiZW1haWwiOiJhbHVub3JvYmVydG9AZW1haWwuY29tIiwidGlwbyI6IkFMVU5PIiwiZXhwIjoxNzc0ODI4OTcxfQ.WJdtQoXNCVVQa963vtNpyz2I9UIxyrMXE1LFcgU5Olo
-Content-Type: application/json
-
-{
-  "nome": "Maria Oliveira Dutra Santos"
-}
