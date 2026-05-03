@@ -1,5 +1,5 @@
 ### 
 
-POST http://localhost:8000/api/v1/turmas/3/alunos/1 HTTP/1.1
+POST http://localhost:8000/api/v1/turmas/4/alunos/5 HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5IiwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3NzUzNjc4MjZ9.0kEp31XNIKXHU2nxSQNDBzu-FU87qVjqiqzrqLw694s
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5IiwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3NzYwNDU4MTV9.fnk-u5WmrqxuDl1-ef7rWVPANL26XSUMijoElGM9D-Y

@@ -1,14 +1,16 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from datetime import datetime
+from sqlalchemy import func
+from geoalchemy2.functions import ST_Distance
 from app.models.Presenca import Presenca
 from app.models.Chamada import Chamada
 
 class PresencaRepository:
     def __init__(self, db: Session):
-        self.db = db 
+        self.db = db
 
-    def get_chamada(sef, chamada_id: int) -> Optional[Chamada]:
+    def get_chamada(self, chamada_id: int) -> Optional[Chamada]:
         return self.db.query(Chamada).filter(
             Chamada.id == chamada_id).first()
 
@@ -56,3 +58,8 @@ class PresencaRepository:
             query = query.filter(Presenca.data_registro <= data_fim)
 
         return query.order_by(Presenca.data_registro).all()
+
+    def get_presencas_chamada(self, chamada_id: int):
+        return self.db.query(Presenca).filter(
+            Presenca.chamada_id == chamada_id
+        ).order_by(Presenca.data_registro).all()

@@ -1,5 +1,5 @@
-from sqlalchemy import func
-from sqlalchemy2 import Geography
+from sqlalchemy import func 
+from geoalchemy2 import Geography
 
 class GeoUtils:
     @staticmethod
