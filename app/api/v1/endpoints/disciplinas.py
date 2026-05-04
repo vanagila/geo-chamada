@@ -61,7 +61,7 @@ def atualizar_disciplina(
     disciplina = service.update_disciplina(disciplina_id, disciplina_data)
     return disciplina
 
-@router.delete("{disciplina_id}", response_model=Msg)
+@router.delete("/{disciplina_id}", response_model=Msg)
 def deletar_disciplina(
     *, db: Session = Depends(get_db),
     disciplina_id: int,

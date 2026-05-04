@@ -1,0 +1,13 @@
+### 
+
+POST http://localhost:8000/api/v1/presencas/registrar HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1IiwiZW1haWwiOiJ2YW5hZ2lsYUBlbWFpbC5jb20iLCJ0aXBvIjoiQUxVTk8iLCJleHAiOjE3NzYxMTAwNTZ9.qzsICUMzDHg7XesLWHcxivAb4s7_c3NtBnfN36IdPcI
+
+{
+  "chamada_id": 6,
+  "coordenadas": {
+    "latitude": -23.5501,
+    "longitude": -46.6333
+  }
+}

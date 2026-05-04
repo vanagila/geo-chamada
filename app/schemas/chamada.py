@@ -24,11 +24,10 @@ class ChamadaUpdate(BaseModel):
 class ChamadaResponse(ChamadaBase):
     id: int
     professor_id: int
-    coordenadas_professor: dict
+    coordenadas_professor: Coordenadas
     data_abertura: datetime
     data_encerramento: Optional[datetime]
     status: ChamadaStatus
 
     class Config:
         from_attributes = True
-

@@ -25,7 +25,7 @@ def criar_chamada(
             detail=str(e)
         )
 
-@router.post("{chamada_id}/encerrar")
+@router.post("/{chamada_id}/encerrar")
 def fechar_chamada(
     *, db: Session = Depends(get_db),
     chamada_id: int,
@@ -40,3 +40,12 @@ def fechar_chamada(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
         )
+
+@router.get("/{chamada_id}/relatorio")
+def relatorio_presencas(
+    chamada_id: int,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
+) -> Any:
+    chamada_service = ChamadaService(db)
+    return chamada_service.relatorio_presencas(chamada_id)

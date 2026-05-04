@@ -1,9 +1,10 @@
-from sqlalchemy import func
+from sqlalchemy import func 
+from geoalchemy2 import Geography
 
 class GeoUtils:
     @staticmethod
     def criar_ponto(latitude: float, longitude: float):
-        return func.ST_SetSRID(func.ST_MakePoint(longitude, latitude), 4326)
+        return func.ST_SetSRID(func.ST_MakePoint(longitude, latitude), 4326).cast(Geography)
 
     @staticmethod
     def validar_coordenadas(latitude: float, longitude: float) -> bool:
