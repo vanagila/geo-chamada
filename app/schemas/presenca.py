@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from enum import Enum
 from app.schemas.chamada import Coordenadas
@@ -33,3 +33,19 @@ class PresencaResponse(BaseModel):
 class AbonoRequest(BaseModel):
     presenca_id: int
     motivo: str
+
+class DisciplinaResumo(BaseModel):
+    id: int
+    nome: str
+    codigo: str
+
+class EstatisticaResponse(BaseModel):
+    total: int
+    presentes: int
+    ausentes: int
+    abonadas: int
+
+class HistoricoAlunoDisciplinaResponse(BaseModel):
+    disciplina: DisciplinaResumo
+    presencas: List[PresencaResponse]
+    estatisticas: EstatisticaResponse

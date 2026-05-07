@@ -24,7 +24,7 @@ config = context.config
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    DATABASE_URL = "postgresql+psycopg://vanagila:postgresql@localhost:5432/geo_chamada"
+    DATABASE_URL = "postgresql+psycopg://postgresql:postgresql@localhost:5432/geo_chamada"
 
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 

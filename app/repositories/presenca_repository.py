@@ -5,6 +5,7 @@ from sqlalchemy import func
 from geoalchemy2.functions import ST_Distance
 from app.models.Presenca import Presenca
 from app.models.Chamada import Chamada
+from app.models.Turma import Turma
 
 class PresencaRepository:
     def __init__(self, db: Session):
@@ -38,7 +39,7 @@ class PresencaRepository:
             Presenca.chamada_id == chamada_id
         ).order_by(Presenca.data_registro).all()
 
-    def get_historico_aluno(self, aluno_id: int) -> List[Presenca]:
+    def historico_aluno(self, aluno_id: int) -> List[Presenca]:
         return self.db.query(Presenca).filter(
             Presenca.aluno_id == aluno_id
         ).order_by(Presenca.data_registro.desc()).all()
@@ -48,18 +49,33 @@ class PresencaRepository:
         self.db.refresh(presenca)
         return presenca
 
-    def get_presencas_turma(self, turma_id: int, data_inicio: datetime = None, data_fim: datetime = None) -> List[Presenca]:
+    def presencas_turma(self, turma_id: int, data_inicio: datetime | None = None, data_fim: datetime | None = None) -> List[Presenca]:
         query = self.db.query(Presenca).join(Chamada).filter(
             Chamada.turma_id == turma_id)
 
         if data_inicio:
-            query = query.filter(Presenca.data_registro >= data_inicio)
+            query = query.filter(Presenca.data_registro >= data_inicio.replace(hour=0, minute=0, second=0))
         if data_fim:
-            query = query.filter(Presenca.data_registro <= data_fim)
+            query = query.filter(Presenca.data_registro <= data_fim.replace(hour=23, minute=59, second=59, microsecond=999999))
 
         return query.order_by(Presenca.data_registro).all()
 
-    def get_presencas_chamada(self, chamada_id: int):
+    def historico_aluno_disciplina(self, aluno_id: int, disciplina_id: int, skip: int = 0, limit: int = 100) -> List[Presenca]:
+        return (
+            self.db.query(Presenca)
+            .join(Chamada, Chamada.id == Presenca.chamada_id)
+            .join(Turma, Turma.id == Chamada.turma_id)
+            .filter(
+                Presenca.aluno_id == aluno_id,
+                Turma.disciplina_id == disciplina_id
+            )
+            .order_by(Chamada.data_abertura.desc())
+            .offset(skip)
+            .limit(limit)
+            .all()
+        )
+
+    def presencas_chamada(self, chamada_id: int):
         return self.db.query(Presenca).filter(
             Presenca.chamada_id == chamada_id
         ).order_by(Presenca.data_registro).all()

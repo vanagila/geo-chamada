@@ -25,21 +25,14 @@ def criar_chamada(
             detail=str(e)
         )
 
-@router.post("/{chamada_id}/encerrar")
+@router.post("/{chamada_id}/encerrar", response_model=ChamadaResponse)
 def fechar_chamada(
     *, db: Session = Depends(get_db),
     chamada_id: int,
     current_user: Usuario = Depends(verificar_perfil(["PROFESSOR"]))
 ) -> Any:
-    chamada_service = ChamadaService(db)
-    try:
-        chamada = chamada_service.encerrar_chamada(chamada_id)
-        return {"message": "Chamada encerrada com sucesso"}
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+    service = ChamadaService(db)
+    return service.encerrar(chamada_id)
 
 @router.get("/{chamada_id}/relatorio")
 def relatorio_presencas(
@@ -47,5 +40,5 @@ def relatorio_presencas(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
 ) -> Any:
-    chamada_service = ChamadaService(db)
-    return chamada_service.relatorio_presencas(chamada_id)
+    service = ChamadaService(db)
+    return service.relatorio_chamada(chamada_id)

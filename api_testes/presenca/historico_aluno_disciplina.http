@@ -1,0 +1,5 @@
+### 
+
+GET http://localhost:8000/api/v1/presencas/historico/disciplina/1 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhbHVub0BlbWFpbC5jb20iLCJ0aXBvIjoiQUxVTk8iLCJleHAiOjE3NzgxMTk0MjV9.dU-hKiL15GuHUugXQOz0KeQUVvajD2BVq8NzYgmDoQA

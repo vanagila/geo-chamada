@@ -1,5 +1,0 @@
-### 
-
-GET http://localhost:8000/api/v1/chamadas/1/relatorio HTTP/1.1
-Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5IiwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3NzYwNTM5MTl9.hIH-8-srgCHiQDtHISpms3nlvlJLp9qdOK2uksjSiHo

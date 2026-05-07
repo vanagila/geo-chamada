@@ -36,11 +36,9 @@ class ChamadaRepository:
     def get_by_professor(self, professor_id: int, skip: int = 0, limit: int = 110) -> List[Chamada]:
         return self.db.query(Chamada).filter(Chamada.professor_id == professor_id).offset(skip).limit(limit).all()
 
-    def encerrar(self, chamada_id: int) -> Optional[Chamada]:
-        chamada = self.get_by_id(chamada_id)
-        if chamada:
-            chamada.status = ChamadaStatus.ENCERRADA
-            chamada.data_encerramento = datetime.utcnow()
-            self.db.commit()
-            self.db.refresh(chamada)
+    def encerrar(self, chamada: Chamada) -> Chamada:
+        chamada.status = ChamadaStatus.ENCERRADA
+        chamada.data_encerramento = datetime.utcnow()
+        self.db.commit()
+        self.db.refresh(chamada)
         return chamada

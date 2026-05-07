@@ -7,6 +7,8 @@ from app.models.Chamada import Chamada, ChamadaStatus
 from app.repositories.presenca_repository import PresencaRepository
 from app.models.Turma import Turma
 from app.utils.geo import GeoUtils
+from app.utils.presenca_mapper import presenca_to_response
+from app.utils.chamada_mapper import chamada_to_response
 from geoalchemy2.shape import to_shape
 
 class ChamadaService:
@@ -41,8 +43,8 @@ class ChamadaService:
         }
         return chamada
 
-    def encerrar_chamada(self, chamada_id):
-        chamada = self.repository.encerrar(chamada_id)
+    def encerrar(self, chamada_id: int) -> ChamadaResponse:
+        chamada = self.repository.get_by_id(chamada_id)
         if not chamada:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -54,14 +56,18 @@ class ChamadaService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Chamada já encerrada"
             )
-        return chamada
+        chamada_atualizada = self.repository.encerrar(chamada)
+        return chamada_to_response(chamada_atualizada)
 
-    def relatorio_presencas(self, chamada_id: int):
+    def relatorio_chamada(self, chamada_id: int) -> dict:
         chamada = self.repository.get_by_id(chamada_id)
         if not chamada:
-            raise ValueError("Chamada não encontrada")
-
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Chamada não encontrada"
+            )
         presencas = self.presenca_repo.get_by_chamada(chamada_id)
+        presencas_serializaveis = [presenca_to_response(p) for p in presencas]
         return {
             "chamada": {
                 "id": chamada.id,
@@ -70,7 +76,7 @@ class ChamadaService:
                 "raio": chamada.raio,
                 "status": chamada.status
             },
-            "presencas": presencas,
+            "presencas": presencas_serializaveis,
             "estatisticas": {
                 "total": len(presencas),
                 "presentes": sum(1 for p in presencas if p.status.value == "PRESENTE"),
