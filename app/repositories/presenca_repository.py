@@ -11,10 +11,6 @@ class PresencaRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_chamada(self, chamada_id: int) -> Optional[Chamada]:
-        return self.db.query(Chamada).filter(
-            Chamada.id == chamada_id).first()
-
     def verificar_duplicidade(self, aluno_id: int, chamada_id: int) -> bool:
         return self.db.query(Presenca).filter(
             Presenca.aluno_id == aluno_id,
@@ -74,8 +70,3 @@ class PresencaRepository:
             .limit(limit)
             .all()
         )
-
-    def presencas_chamada(self, chamada_id: int):
-        return self.db.query(Presenca).filter(
-            Presenca.chamada_id == chamada_id
-        ).order_by(Presenca.data_registro).all()

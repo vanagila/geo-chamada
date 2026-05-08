@@ -15,7 +15,7 @@ class ChamadaService:
     def __init__(self, db: Session):
         self.db = db
         self.repository = ChamadaRepository(db)
-        self.presenca_repo = PresencaRepository(db)
+        self.presenca_repo = PresencaRepository(db) 
 
     def abrir_chamada(self, chamada_data: ChamadaCreate, professor_id: int):
         turma = self.db.query(Turma).filter(Turma.id == chamada_data.turma_id).first()
@@ -58,6 +58,23 @@ class ChamadaService:
             )
         chamada_atualizada = self.repository.encerrar(chamada)
         return chamada_to_response(chamada_atualizada)
+
+    def get_by_id(self, chamada_id: int) -> ChamadaResponse:
+        chamada = self.repository.get_by_id(chamada_id)
+        if not chamada:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Chamada não encontrada"
+            )
+        return chamada_to_response(chamada)
+
+    def get_by_turma(self, turma_id: int, skip: int = 0, limit: int = 100) -> List[ChamadaResponse]:
+        chamadas = self.repository.get_by_turma(turma_id, skip=skip, limit=limit)
+        return [chamada_to_response(c) for c in chamadas]
+
+    def get_by_professor(self, professor_id: int, skip: int = 0, limit: int = 100) -> List[ChamadaResponse]:
+        chamadas = self.repository.get_by_professor(professor_id, skip=skip, limit=limit)
+        return [chamada_to_response(c) for c in chamadas]
 
     def relatorio_chamada(self, chamada_id: int) -> dict:
         chamada = self.repository.get_by_id(chamada_id)

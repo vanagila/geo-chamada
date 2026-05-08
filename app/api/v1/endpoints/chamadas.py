@@ -26,7 +26,7 @@ def criar_chamada(
         )
 
 @router.post("/{chamada_id}/encerrar", response_model=ChamadaResponse)
-def fechar_chamada(
+def encerrar_chamada(
     *, db: Session = Depends(get_db),
     chamada_id: int,
     current_user: Usuario = Depends(verificar_perfil(["PROFESSOR"]))
@@ -36,9 +36,40 @@ def fechar_chamada(
 
 @router.get("/{chamada_id}/relatorio")
 def relatorio_presencas(
-    chamada_id: int,
+    *, chamada_id: int,
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
 ) -> Any:
     service = ChamadaService(db)
     return service.relatorio_chamada(chamada_id)
+
+@router.get("/{chamada_id}", response_model=ChamadaResponse)
+def get_chamada(
+    *, db: Session = Depends(get_db),
+    chamada_id: int,
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
+) -> Any:
+    service = ChamadaService(db)
+    return service.get_by_id(chamada_id)
+
+@router.get("/turma/{turma_id}", response_model=List[ChamadaResponse])
+def get_by_turma(
+    *, db: Session = Depends(get_db),
+    turma_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
+) -> Any:
+    service = ChamadaService(db)
+    return service.get_by_turma(turma_id, skip, limit)
+
+@router.get("/professor/{professor_id}", response_model=List[ChamadaResponse])
+def get_by_professor(
+    *, db: Session = Depends(get_db),
+    professor_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
+) -> Any:
+    service = ChamadaService(db)
+    return service.get_by_professor(professor_id, skip, limit)

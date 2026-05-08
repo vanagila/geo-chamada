@@ -138,5 +138,5 @@ class PresencaService:
         )
 
     def presencas_chamada(self, chamada_id: int) -> List[PresencaResponse]:
-        presencas = self.repository.presencas_chamada(chamada_id)
+        presencas = self.repository.get_by_chamada(chamada_id)
         return [presenca_to_response(p) for p in presencas]
