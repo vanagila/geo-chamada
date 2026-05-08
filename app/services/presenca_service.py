@@ -5,13 +5,17 @@ from datetime import datetime
 from app.models.Presenca import Presenca, PresencaStatus
 from app.models.Usuario import Usuario
 from app.repositories.presenca_repository import PresencaRepository
-from app.schemas.presenca import PresencaCreate, PresencaResponse
+from app.repositories.chamada_repository import ChamadaRepository
+from app.repositories.disciplina_repository import DisciplinaRepository
+from app.schemas.presenca import PresencaCreate, PresencaResponse, HistoricoAlunoDisciplinaResponse, EstatisticaResponse, DisciplinaResumo
 from app.utils.geo import GeoUtils
+from app.utils.presenca_mapper import presenca_to_response
 
 class PresencaService:
     def __init__(self, db: Session):
         self.db = db
         self.repository = PresencaRepository(db)
+        self.disciplina_repo = DisciplinaRepository(db)
 
     def marcar_presenca(self, aluno_id: int, presenca_data: PresencaCreate) -> Tuple[Presenca, bool]:
         chamada = self.repository.get_chamada(presenca_data.chamada_id)
@@ -95,26 +99,44 @@ class PresencaService:
         presenca.motivo_abono = motivo
         return self.repository.abonar(presenca)
 
+    def presencas_turma(self, turma_id: int, data_inicio: datetime | None = None, data_fim: datetime | None = None) -> List[dict]:
+        presencas = self.repository.presencas_turma(turma_id, data_inicio, data_fim)
+        if not presencas:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Nenhuma presença encontrada"
+            )
+        return [presenca_to_response(p) for p in presencas]
+
     def historico_aluno(self, aluno_id: int) -> List[Presenca]:
-        presencas = self.repository.get_historico_aluno(aluno_id)
-        return [self._to_response(p) for p in presencas]
+        presencas = self.repository.historico_aluno(aluno_id)
+        return [presenca_to_response(p) for p in presencas]
+
+    def historico_aluno_disciplina(self, aluno_id: int, disciplina_id: int) -> HistoricoAlunoDisciplinaResponse:
+        disciplina = self.disciplina_repo.get_by_id(disciplina_id)
+        if not disciplina:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Disciplina não encontrada"
+            )
+
+        presencas = self.repository.historico_aluno_disciplina(aluno_id, disciplina_id)
+        presencas_serializaveis = [presenca_to_response(p) for p in presencas]
+        return HistoricoAlunoDisciplinaResponse(
+            disciplina=DisciplinaResumo(
+                id=disciplina.id,
+                nome=disciplina.nome,
+                codigo=disciplina.codigo
+            ),
+            presencas=presencas_serializaveis,
+            estatisticas=EstatisticaResponse(
+                total=len(presencas),
+                presentes=sum(1 for p in presencas if p.status.value == "PRESENTE"),
+                ausentes=sum(1 for p in presencas if p.status.value == "AUSENTE"),
+                abonadas=sum(1 for p in presencas if p.status.value == "ABONADA")
+            )
+        )
 
     def presencas_chamada(self, chamada_id: int) -> List[PresencaResponse]:
-        presencas = self.repository.get_presencas_chamada(chamada_id)
-        return [self._to_response(p) for p in presencas]
-
-    def _to_response(self, p: Presenca) -> PresencaResponse:
-        dentro_raio = (
-            p.distancia_calculada is not None and
-            p.chamada is not None and
-            p.distancia_calculada <= p.chamada.raio
-        )
-        return PresencaResponse(
-            id=p.id,
-            aluno_id=p.aluno_id,
-            chamada_id=p.chamada_id,
-            distancia_calculada=p.distancia_calculada,
-            data_registro=p.data_registro,
-            status=p.status,
-            dentro_raio=dentro_raio
-        )
+        presencas = self.repository.get_by_chamada(chamada_id)
+        return [presenca_to_response(p) for p in presencas]

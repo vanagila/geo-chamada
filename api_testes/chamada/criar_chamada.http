@@ -2,7 +2,7 @@
 
 POST http://localhost:8000/api/v1/chamadas/ HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMCIsImVtYWlsIjoicHJvZmVzc29yanVsaW9AZW1haWwuY29tIiwidGlwbyI6IlBST0ZFU1NPUiIsImV4cCI6MTc3NjEwOTk4MX0.meR_OdF_PrignSNLyTVFubucG5hm7J9ji59NElwZVZ8
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZW1haWwiOiJwcm9mZXNzb3JsdWNhc0BlbWFpbC5jb20iLCJ0aXBvIjoiUFJPRkVTU09SIiwiZXhwIjoxNzc4MTk5NzQ2fQ.BS8446SeyA3x5lIWC8PjX5rsv8Z-qXWZsdIPJDn7yHM
 
 {
   "coordenadas": {
@@ -10,5 +10,5 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMCIsImVtY
     "longitude": -46.6333
   },
   "raio": 50,
-  "turma_id": 4
+  "turma_id": 1
 }

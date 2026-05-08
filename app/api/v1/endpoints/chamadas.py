@@ -25,27 +25,51 @@ def criar_chamada(
             detail=str(e)
         )
 
-@router.post("/{chamada_id}/encerrar")
-def fechar_chamada(
+@router.post("/{chamada_id}/encerrar", response_model=ChamadaResponse)
+def encerrar_chamada(
     *, db: Session = Depends(get_db),
     chamada_id: int,
     current_user: Usuario = Depends(verificar_perfil(["PROFESSOR"]))
 ) -> Any:
-    chamada_service = ChamadaService(db)
-    try:
-        chamada = chamada_service.encerrar_chamada(chamada_id)
-        return {"message": "Chamada encerrada com sucesso"}
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+    service = ChamadaService(db)
+    return service.encerrar(chamada_id)
 
 @router.get("/{chamada_id}/relatorio")
 def relatorio_presencas(
-    chamada_id: int,
+    *, chamada_id: int,
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
 ) -> Any:
-    chamada_service = ChamadaService(db)
-    return chamada_service.relatorio_presencas(chamada_id)
+    service = ChamadaService(db)
+    return service.relatorio_chamada(chamada_id)
+
+@router.get("/{chamada_id}", response_model=ChamadaResponse)
+def get_chamada(
+    *, db: Session = Depends(get_db),
+    chamada_id: int,
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
+) -> Any:
+    service = ChamadaService(db)
+    return service.get_by_id(chamada_id)
+
+@router.get("/turma/{turma_id}", response_model=List[ChamadaResponse])
+def get_by_turma(
+    *, db: Session = Depends(get_db),
+    turma_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
+) -> Any:
+    service = ChamadaService(db)
+    return service.get_by_turma(turma_id, skip, limit)
+
+@router.get("/professor/{professor_id}", response_model=List[ChamadaResponse])
+def get_by_professor(
+    *, db: Session = Depends(get_db),
+    professor_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
+) -> Any:
+    service = ChamadaService(db)
+    return service.get_by_professor(professor_id, skip, limit)

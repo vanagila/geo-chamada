@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Any
+from datetime import datetime
 from app.core.database import get_db
 from app.api.deps import get_current_active_user, verificar_perfil
 from app.models.Usuario import Usuario
-from app.schemas.presenca import PresencaResponse, PresencaCreate, AbonoRequest
+from app.schemas.presenca import PresencaResponse, PresencaCreate, AbonoRequest, HistoricoAlunoDisciplinaResponse
 from app.services.presenca_service import PresencaService
 
 router = APIRouter()
@@ -43,16 +44,36 @@ def abonar_falta(
         abonar_data.motivo
     )
 
-@router.get("/historico_presenca", response_model=List[PresencaResponse])
-def historico_presenca(
+@router.get("/historico_aluno", response_model=List[PresencaResponse])
+def get_historico_aluno(
     *, db: Session = Depends(get_db),
     current_user: Usuario = Depends(verificar_perfil(["ALUNO"]))
 ) -> Any:
     service = PresencaService(db)
     return service.historico_aluno(current_user.id)
 
+@router.get("/historico/disciplina/{disciplina_id}", response_model=HistoricoAlunoDisciplinaResponse)
+def get_historico_aluno_disciplina(
+    *, db: Session = Depends(get_db),
+    disciplina_id: int,
+    current_user: Usuario = Depends(verificar_perfil(["ALUNO"]))
+) -> Any:
+    service = PresencaService(db)
+    return service.historico_aluno_disciplina(current_user.id, disciplina_id)
+
+@router.get("/turma/{turma_id}", response_model=List[PresencaResponse])
+def get_presencas_turma(
+    *, db: Session = Depends(get_db),
+    turma_id: int,
+    data_inicio: datetime = Query(None),
+    data_fim: datetime = Query(None),
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
+):
+    service = PresencaService(db)
+    return service.get_presencas_turma(turma_id, data_inicio, data_fim)
+
 @router.get("/chamada/{chamada_id}", response_model=List[PresencaResponse])
-def presencas_chamada(
+def get_presencas_chamada(
     *, db: Session = Depends(get_db),
     chamada_id: int,
     current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
