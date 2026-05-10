@@ -5,7 +5,7 @@ from datetime import datetime
 from app.core.database import get_db
 from app.api.deps import get_current_active_user, verificar_perfil
 from app.models.Usuario import Usuario
-from app.schemas.presenca import PresencaResponse, PresencaCreate, AbonoRequest, HistoricoAlunoDisciplinaResponse
+from app.schemas.presenca import PresencaResponse, PresencaCreate, AbonoRequest, HistoricoAlunoDisciplinaResponse, AbonoResponse
 from app.services.presenca_service import PresencaService
 
 router = APIRouter()
@@ -31,7 +31,7 @@ def registrar_presenca(
         "dentro_raio": dentro
     }
 
-@router.post("/abonar")
+@router.post("/abonar", response_model=AbonoResponse)
 def abonar_falta(
     *, db: Session = Depends(get_db),
     abonar_data: AbonoRequest,
@@ -39,9 +39,9 @@ def abonar_falta(
 ) -> Any:
     service = PresencaService(db)
     return service.abonar_ausencia(
-        current_user.id,
-        abonar_data.presenca_id,
-        abonar_data.motivo
+        presenca_id=abonar_data.presenca_id,
+        professor_id=current_user.id,
+        motivo=abonar_data.motivo
     )
 
 @router.get("/historico_aluno", response_model=List[PresencaResponse])

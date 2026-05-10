@@ -32,7 +32,7 @@ def encerrar_chamada(
     current_user: Usuario = Depends(verificar_perfil(["PROFESSOR"]))
 ) -> Any:
     service = ChamadaService(db)
-    return service.encerrar(chamada_id)
+    return service.encerrar(chamada_id, current_user.id)
 
 @router.get("/{chamada_id}/relatorio")
 def relatorio_presencas(
