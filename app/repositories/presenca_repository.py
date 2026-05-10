@@ -11,6 +11,9 @@ class PresencaRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    def get_by_id(self, presenca_id: int) -> Optional[Presenca]:
+        return self.db.query(Presenca).filter(Presenca.id == presenca_id).first()
+
     def verificar_duplicidade(self, aluno_id: int, chamada_id: int) -> bool:
         return self.db.query(Presenca).filter(
             Presenca.aluno_id == aluno_id,
@@ -24,7 +27,7 @@ class PresencaRepository:
         ).first()
         return result.distancia, result.dentro
 
-    def create(self, presenca: Presenca) -> Presenca:
+    def save(self, presenca: Presenca) -> Presenca:
         self.db.add(presenca)
         self.db.commit()
         self.db.refresh(presenca)
@@ -39,17 +42,6 @@ class PresencaRepository:
         return self.db.query(Presenca).filter(
             Presenca.aluno_id == aluno_id
         ).order_by(Presenca.data_registro.desc()).all()
-
-    def abonar(self, presenca_id: int, professor_id: int, motivo: str) -> Optional[Presenca]:
-        presenca = self.db.query(Presenca).filter(Presenca.id == presenca_id).first()
-        if presenca:
-            presenca.status = PresencaStatus.ABONADA
-            presenca.abonado_por_id = professor_id
-            presenca.data_abono = datetime.utcnow()
-            presenca.motivo_abono = motivo
-            self.db.commit()
-            self.db.refresh(presenca)
-        return presenca
 
     def presencas_turma(self, turma_id: int, data_inicio: datetime | None = None, data_fim: datetime | None = None) -> List[Presenca]:
         query = self.db.query(Presenca).join(Chamada).filter(

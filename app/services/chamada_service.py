@@ -61,7 +61,7 @@ class ChamadaService:
 
         if chamada.professor_id != professor_id:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail="Apenas o professor que abriu a chamada pode encerrá-la"
             )
 
@@ -72,10 +72,12 @@ class ChamadaService:
                 detail="Turma não encontrada"
             )
 
+        from app.services.presenca_service import PresencaService
+        presenca_serv = PresencaService(self.db)
         for aluno in turma.alunos:
             presenca_existente = self.presenca_repo.verificar_duplicidade(aluno.id, chamada_id)
             if not presenca_existente:
-                self.presenca_repo.presenca_automatica(aluno_id=aluno.id, chamada_id=chamada_id, status="AUSENTE")
+                presenca_serv.presenca_automatica(aluno_id=aluno.id, chamada_id=chamada_id, status="AUSENTE")
 
         chamada_atualizada = self.repository.encerrar(chamada)
         return chamada_to_response(chamada_atualizada)
