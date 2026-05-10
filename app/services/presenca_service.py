@@ -4,10 +4,11 @@ from fastapi import HTTPException, status
 from datetime import datetime
 from app.models.Presenca import Presenca, PresencaStatus
 from app.models.Usuario import Usuario
+from app.models.Chamada import Chamada
 from app.repositories.presenca_repository import PresencaRepository
 from app.repositories.chamada_repository import ChamadaRepository
 from app.repositories.disciplina_repository import DisciplinaRepository
-from app.schemas.presenca import PresencaCreate, PresencaResponse, HistoricoAlunoDisciplinaResponse, EstatisticaResponse, DisciplinaResumo
+from app.schemas.presenca import PresencaCreate, PresencaResponse, HistoricoAlunoDisciplinaResponse, EstatisticaResponse, DisciplinaResumo, AbonoResponse, AbonoDetailResponse
 from app.utils.geo import GeoUtils
 from app.utils.presenca_mapper import presenca_to_response
 
@@ -16,9 +17,10 @@ class PresencaService:
         self.db = db
         self.repository = PresencaRepository(db)
         self.disciplina_repo = DisciplinaRepository(db)
+        self.chamada_repo = ChamadaRepository(db)
 
     def marcar_presenca(self, aluno_id: int, presenca_data: PresencaCreate) -> Tuple[Presenca, bool]:
-        chamada = self.repository.get_chamada(presenca_data.chamada_id)
+        chamada = self.chamada_repo.get_by_id(presenca_data.chamada_id)
         if not chamada:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -85,7 +87,7 @@ class PresencaService:
         presenca = self.repository.create(presenca)
         return presenca, dentro
 
-    def abonar_ausencia(self, professor_id: int, presenca_id: int, motivo: str) -> Presenca:
+    def abonar_ausencia(self, professor_id: int, presenca_id: int, motivo: str) -> AbonoResponse:
         presenca = self.db.query(Presenca).filter(
             Presenca.id == presenca_id).first()
         if not presenca:
@@ -93,11 +95,52 @@ class PresencaService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Presença não encontrada"
             )
-        presenca.status = PresencaStatus.ABONADA
-        presenca.abonado_por_id = professor_id
-        presenca.data_abono = datetime.utcnow()
-        presenca.motivo_abono = motivo
-        return self.repository.abonar(presenca)
+
+        if presenca.status == PresencaStatus.ABONADA:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Falta já abonada"
+            )
+
+        if presenca.status == PresencaStatus.PRESENTE:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Não é possível abonar uma presença já confirmada"
+            )
+
+        chamada = self.db.query(Chamada).filter(Chamada.id == presenca.chamada_id).first()
+        if chamada and chamada.professor_id != professor_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Você só pode abonar faltas das suas próprias chamadas"
+            )
+
+        presenca_atualizada = self.repository.abonar(
+            presenca_id=presenca_id,
+            professor_id=professor_id,
+            motivo=motivo
+        )
+
+        if not presenca_atualizada:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Erro ao abonar falta"
+            )
+
+        return AbonoResponse(
+            message="Falta abonada com sucesso",
+            presenca=AbonoDetailResponse(
+                id=presenca.id,
+                aluno_id=presenca.aluno_id,
+                chamada_id=presenca.chamada_id,
+                status=presenca.status.value,
+                distancia_calculada=presenca.distancia_calculada,
+                data_registro=presenca.data_registro,
+                abonado_por_id=professor_id,
+                data_abono=presenca.data_abono,
+                motivo_abono=presenca.motivo_abono
+            )
+        )
 
     def presencas_turma(self, turma_id: int, data_inicio: datetime | None = None, data_fim: datetime | None = None) -> List[dict]:
         presencas = self.repository.presencas_turma(turma_id, data_inicio, data_fim)

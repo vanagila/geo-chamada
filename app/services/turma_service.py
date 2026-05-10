@@ -134,6 +134,6 @@ class TurmaService:
             detail="Turma ou aluno não encontrado"
         )
         return {
-            "message": "Professor removido com sucesso",
+            "message": "Aluno removido com sucesso",
             "turma": turma
         }

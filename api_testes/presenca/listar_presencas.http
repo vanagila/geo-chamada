@@ -1,5 +1,5 @@
 ### 
 
-GET http://localhost:8000/api/v1/presencas/chamada/2 HTTP/1.1
+GET http://localhost:8000/api/v1/presencas/chamada/7 HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZW1haWwiOiJwcm9mZXNzb3JsdWNhc0BlbWFpbC5jb20iLCJ0aXBvIjoiUFJPRkVTU09SIiwiZXhwIjoxNzc4Mjg1MzkzfQ.eI0e8CkbgJXwcO6smr5Vtw0G2OWhU8d4VBmItnUMPmE
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZW1haWwiOiJwcm9mZXNzb3JsdWNhc0BlbWFpbC5jb20iLCJ0aXBvIjoiUFJPRkVTU09SIiwiZXhwIjoxNzc4MjkwMzI2fQ.RdTEjt7YBMe4tWvrgzkVdn1NJY3SoEJKbcYVh04BGNI

@@ -5,6 +5,7 @@ from app.repositories.chamada_repository import ChamadaRepository
 from app.schemas.chamada import ChamadaCreate, ChamadaUpdate, ChamadaResponse
 from app.models.Chamada import Chamada, ChamadaStatus
 from app.repositories.presenca_repository import PresencaRepository
+from app.repositories.turma_repository import TurmaRepository
 from app.models.Turma import Turma
 from app.utils.geo import GeoUtils
 from app.utils.presenca_mapper import presenca_to_response
@@ -15,7 +16,8 @@ class ChamadaService:
     def __init__(self, db: Session):
         self.db = db
         self.repository = ChamadaRepository(db)
-        self.presenca_repo = PresencaRepository(db) 
+        self.presenca_repo = PresencaRepository(db)
+        self.turma_repo = TurmaRepository(db)
 
     def abrir_chamada(self, chamada_data: ChamadaCreate, professor_id: int):
         turma = self.db.query(Turma).filter(Turma.id == chamada_data.turma_id).first()
@@ -43,7 +45,7 @@ class ChamadaService:
         }
         return chamada
 
-    def encerrar(self, chamada_id: int) -> ChamadaResponse:
+    def encerrar(self, chamada_id: int, professor_id: int) -> ChamadaResponse:
         chamada = self.repository.get_by_id(chamada_id)
         if not chamada:
             raise HTTPException(
@@ -56,6 +58,25 @@ class ChamadaService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Chamada já encerrada"
             )
+
+        if chamada.professor_id != professor_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Apenas o professor que abriu a chamada pode encerrá-la"
+            )
+
+        turma = self.turma_repo.get_by_id(chamada.turma_id)
+        if not turma:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Turma não encontrada"
+            )
+
+        for aluno in turma.alunos:
+            presenca_existente = self.presenca_repo.verificar_duplicidade(aluno.id, chamada_id)
+            if not presenca_existente:
+                self.presenca_repo.presenca_automatica(aluno_id=aluno.id, chamada_id=chamada_id, status="AUSENTE")
+
         chamada_atualizada = self.repository.encerrar(chamada)
         return chamada_to_response(chamada_atualizada)
 
