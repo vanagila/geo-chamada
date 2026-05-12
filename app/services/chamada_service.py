@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from fastapi import HTTPException, status
+from datetime import datetime
 from app.repositories.chamada_repository import ChamadaRepository
 from app.schemas.chamada import ChamadaCreate, ChamadaUpdate, ChamadaResponse
 from app.models.Chamada import Chamada, ChamadaStatus
@@ -19,8 +20,8 @@ class ChamadaService:
         self.presenca_repo = PresencaRepository(db)
         self.turma_repo = TurmaRepository(db)
 
-    def abrir_chamada(self, chamada_data: ChamadaCreate, professor_id: int):
-        turma = self.db.query(Turma).filter(Turma.id == chamada_data.turma_id).first()
+    def abrir_chamada(self, chamada_data: ChamadaCreate, professor_id: int) -> ChamadaResponse:
+        turma = self.turma_repo.get_by_id(chamada_data.turma_id)
         if not turma:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -34,18 +35,29 @@ class ChamadaService:
             )
 
         if not GeoUtils.validar_coordenadas(chamada_data.coordenadas.latitude, chamada_data.coordenadas.longitude):
-            raise ValueError("Coordenadas inválidas")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Coordenadas inválidas"
+            )
 
-        chamada = self.repository.create(chamada_data, professor_id)
+        ponto_geom = GeoUtils.criar_ponto(
+            chamada_data.coordenadas.latitude,
+            chamada_data.coordenadas.longitude
+        )
 
-        ponto_geom = to_shape(chamada.coordenadas_professor)
-        chamada.coordenadas_professor = {
-            "latitude": ponto_geom.y,
-            "longitude": ponto_geom.x
-        }
-        return chamada
+        nova_chamada = Chamada(
+            turma_id=chamada_data.turma_id,
+            professor_id=professor_id,
+            coordenadas_professor=ponto_geom,
+            raio=chamada_data.raio,
+            data_abertura=datetime.utcnow(),
+            status=ChamadaStatus.ABERTA
+        )
 
-    def encerrar(self, chamada_id: int, professor_id: int) -> ChamadaResponse:
+        chamada_salva = self.repository.save(nova_chamada)
+        return chamada_to_response(chamada_salva)
+
+    def encerrar_chamada(self, chamada_id: int, professor_id: int) -> ChamadaResponse:
         chamada = self.repository.get_by_id(chamada_id)
         if not chamada:
             raise HTTPException(
@@ -72,6 +84,9 @@ class ChamadaService:
                 detail="Turma não encontrada"
             )
 
+        chamada.status = ChamadaStatus.ENCERRADA
+        chamada.data_encerramento = datetime.utcnow()
+
         from app.services.presenca_service import PresencaService
         presenca_serv = PresencaService(self.db)
         for aluno in turma.alunos:
@@ -79,7 +94,7 @@ class ChamadaService:
             if not presenca_existente:
                 presenca_serv.presenca_automatica(aluno_id=aluno.id, chamada_id=chamada_id, status="AUSENTE")
 
-        chamada_atualizada = self.repository.encerrar(chamada)
+        chamada_atualizada = self.repository.save(chamada)
         return chamada_to_response(chamada_atualizada)
 
     def get_by_id(self, chamada_id: int) -> ChamadaResponse:
