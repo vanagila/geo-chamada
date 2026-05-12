@@ -1,8 +1,8 @@
 ### 
 
-PUT http://localhost:8000/api/v1/turmas/3 HTTP/1.1
+PUT http://localhost:8000/api/v1/turmas/7 HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5IiwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3NzUzODA4NTF9.sIsul_-MPfcULcaDPdXE4QbWlozP90dzvXkrbL2sh4E
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJhZG1pbkBlbWFpbC5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3Nzg0NTQyOTh9.MzaCmqeUi8FVfmAyvmZ-m0QeuBU8i21DcsYWF3zizLY
 
 {
   "horario": "19:30:00"

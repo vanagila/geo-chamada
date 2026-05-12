@@ -67,24 +67,3 @@ class PresencaRepository:
             .limit(limit)
             .all()
         )
-
-    def presenca_automatica(self, aluno_id: int, chamada_id: int, status: str) -> Presenca:
-        if status == "AUSENTE":
-            status_enum = PresencaStatus.AUSENTE
-        elif status == "PRESENTE":
-            status_enum = PresencaStatus.PRESENTE
-        else:
-            status_enum = PresencaStatus.ABONADA
-
-        presenca = Presenca(
-            aluno_id=aluno_id,
-            chamada_id=chamada_id,
-            coordenadas_aluno=None,
-            distancia_calculada=None,
-            data_registro=datetime.utcnow(),
-            status=status_enum
-        )
-        self.db.add(presenca)
-        self.db.commit()
-        self.db.refresh(presenca)
-        return presenca
