@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
-from app.schemas.chamada import Coordenadas
+from app.schemas.geo import Coordenadas
 
 class PresencaStatus(str, Enum):
     PRESENTE = "PRESENTE"

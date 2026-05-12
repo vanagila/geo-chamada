@@ -9,6 +9,8 @@ from app.repositories.presenca_repository import PresencaRepository
 from app.repositories.turma_repository import TurmaRepository
 from app.models.Turma import Turma
 from app.utils.geo import GeoUtils
+from app.schemas.chamada import ChamadaResponse, ChamadaStatus, ChamadaCreate, ChamadaResumo, RelatorioChamadaResponse
+from app.schemas.presenca import EstatisticaResponse
 from app.utils.presenca_mapper import presenca_to_response
 from app.utils.chamada_mapper import chamada_to_response
 from geoalchemy2.shape import to_shape
@@ -114,7 +116,7 @@ class ChamadaService:
         chamadas = self.repository.get_by_professor(professor_id, skip=skip, limit=limit)
         return [chamada_to_response(c) for c in chamadas]
 
-    def relatorio_chamada(self, chamada_id: int) -> dict:
+    def relatorio_chamada(self, chamada_id: int) -> RelatorioChamadaResponse:
         chamada = self.repository.get_by_id(chamada_id)
         if not chamada:
             raise HTTPException(
@@ -123,19 +125,20 @@ class ChamadaService:
             )
         presencas = self.presenca_repo.get_by_chamada(chamada_id)
         presencas_serializaveis = [presenca_to_response(p) for p in presencas]
-        return {
-            "chamada": {
-                "id": chamada.id,
-                "data_abertura": chamada.data_abertura,
-                "data_encerramento": chamada.data_encerramento,
-                "raio": chamada.raio,
-                "status": chamada.status
-            },
-            "presencas": presencas_serializaveis,
-            "estatisticas": {
-                "total": len(presencas),
-                "presentes": sum(1 for p in presencas if p.status.value == "PRESENTE"),
-                "ausentes": sum(1 for p in presencas if p.status.value == "AUSENTE"),
-                "abonadas": sum(1 for p in presencas if p.status.value == "ABONADA")
-            }
-        }
+        return RelatorioChamadaResponse(
+            chamada=ChamadaResumo(
+                id=chamada.id,
+                data_abertura=chamada.data_abertura,
+                data_encerramento=chamada.data_encerramento,
+                raio=chamada.raio,
+                status=chamada.status.value
+            ),
+            presencas=presencas_serializaveis,
+            estatisticas=EstatisticaResponse(
+                total=len(presencas),
+                presentes=sum(1 for p in presencas if p.status.value == "PRESENTE"),
+                ausentes=sum(1 for p in presencas if p.status.value == "AUSENTE"),
+                abonadas=sum(1 for p in presencas if p.status.value == "ABONADA")
+            )
+        )
+

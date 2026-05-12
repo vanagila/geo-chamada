@@ -4,7 +4,7 @@ from typing import List, Any
 from app.core.database import get_db
 from app.api.deps import get_current_active_user, verificar_perfil
 from app.models.Usuario import Usuario
-from app.schemas.chamada import ChamadaCreate, ChamadaResponse
+from app.schemas.chamada import ChamadaCreate, ChamadaResponse, RelatorioChamadaResponse
 from app.services.chamada_service import ChamadaService
 
 router = APIRouter()
@@ -27,7 +27,7 @@ def encerrar_chamada(
     service = ChamadaService(db)
     return service.encerrar_chamada(chamada_id, current_user.id)
 
-@router.get("/{chamada_id}/relatorio")
+@router.get("/{chamada_id}/relatorio", response_model=RelatorioChamadaResponse)
 def relatorio_presencas(
     *, chamada_id: int,
     db: Session = Depends(get_db),
