@@ -22,7 +22,7 @@ class DisciplinaResponse(DisciplinaBase):
 
 class DisciplinaMessage(BaseModel):
     message: str
-    turma: DisciplinaResponse
+    disciplina: DisciplinaResponse
 
     class Config:
         from_attributes = True
