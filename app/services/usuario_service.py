@@ -2,7 +2,8 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from fastapi import HTTPException, status
 from app.repositories.usuario_repository import UsuarioRepository
-from app.schemas.usuario import UsuarioCreate, UsuarioUpdate, UsuarioResponse
+from app.schemas.usuario import UsuarioCreate, UsuarioUpdate, UsuarioResponse, UsuarioMessage
+from app.schemas.msg import Msg
 from app.models.Usuario import Usuario
 
 class UsuarioService:
@@ -10,17 +11,8 @@ class UsuarioService:
         self.db = db
         self.repository = UsuarioRepository(db)
 
-    def get_user_by_id(self, usuario_id: int) -> Usuario:
+    def get_by_id(self, usuario_id: int) -> Usuario:
         usuario = self.repository.get_by_id(usuario_id)
-        if not usuario:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Usuário não encontrado"
-            )
-        return usuario
-
-    def get_user_by_email(self, email: str) -> Usuario:
-        usuario = self.repository.get_by_email(email)
         if not usuario:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -34,77 +26,86 @@ class UsuarioService:
     def get_by_type(self, tipo: str, skip: int = 0, limit: int = 100) -> List[Usuario]:
         return self.repository.get_by_tipo(tipo, skip, limit)
 
-    def update_user(self, usuario_id: int, usuario_data: UsuarioUpdate) -> dict:
-        usuario = self.repository.update(usuario_id, usuario_data)
-        if not usuario:
+    def get_by_matricula(self, matricula: str) -> Usuario:
+        aluno = self.repository.get_by_matricula(matricula)
+        if not aluno:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Usuário não encontrado"
+                detail="Aluno não encontrado"
             )
-        return {
-            "message": "Usuário atualizado com sucesso",
-            "usuario": usuario
-        }
+        return aluno
 
-    def activate_user(self, usuario_id: int) -> dict:
-        usuario = self.repository.activate(usuario_id)
-        if not usuario:
+    def get_by_registro(self, registro: str) -> Usuario:
+        professor = self.repository.get_by_registro(registro)
+        if not professor:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Usuário não encontrado"
+                detail="Professor não encontrado"
             )
-        return {
-            "message": "Usuário ativado com sucesso",
-            "usuario": usuario
-        }
+        return professor
 
-    def deactivate_user(self, usuario_id: int) -> dict:
-        usuario = self.repository.deactivate(usuario_id)
+    def update_usuario(self, usuario_id: int, usuario_data: UsuarioUpdate) -> UsuarioMessage:
+        usuario = self.repository.get_by_id(usuario_id)
         if not usuario:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Usuário não encontrado"
             )
-        return {
-            "message": "Usuário desativado com sucesso",
-            "usuario": usuario
-        }
-    
-    def delete_user(self, usuario_id: int) -> dict:
-        if self.repository.delete(usuario_id):
-            return {"message": "Usuário deletado com sucesso"}
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Usuário não encontrado"
+        update_data = usuario_data.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(usuario, field, value)
+
+        usuario_salvo = self.repository.save(usuario)
+        return UsuarioMessage(
+            message="Usuário atualizado com sucesso",
+            usuario=usuario_salvo
         )
+
+    def activate_usuario(self, usuario_id: int) -> UsuarioMessage:
+        usuario = self.repository.get_by_id(usuario_id)
+        if not usuario:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Usuário não encontrado"
+            )
+        usuario.ativo = True
+        usuario_salvo = self.repository.save(usuario)
+        return UsuarioMessage(
+            message="Usuário ativado com sucesso",
+            usuario=usuario_salvo
+        )
+
+    def deactivate_usuario(self, usuario_id: int) -> UsuarioMessage:
+        usuario = self.repository.get_by_id(usuario_id)
+        if not usuario:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Usuário não encontrado"
+            )
+        usuario.ativo = False
+        usuario_salvo = self.repository.save(usuario)
+        return UsuarioMessage(
+            message="Usuário desativado com sucesso",
+            usuario=usuario_salvo
+        )
+
+    def delete_usuario(self, usuario_id: int) -> Msg:
+        usuario = self.repository.get_by_id(usuario_id)
+        if not usuario:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Usuário não encontrado"
+            )
+        self.repository.delete(usuario)
+        return Msg(message="Usuário deletado com sucesso")
 
     def verificar_permissao(self, usuario: Usuario, recurso: str, acao: str) -> bool:
         if usuario.tipo.value == "ADMIN":
             return True
-
         if usuario.tipo.value == "PROFESSOR":
-            if recurso == "turma":
-                return True
-            if recurso == "chamada" and acao in ["abrir", "encerrar", "visualizar"]:
-                return True
-        
+            if recurso == "turma": return True
+            if recurso == "chamada" and acao in ["abrir", "encerrar", "visualizar"]: return True
         if usuario.tipo.value == "ALUNO":
-            if recurso == "presenca" and acao == "visualizar":
-                return True
-            if recurso == "chamada" and acao == "registrar":
-                return True
-        
+            if recurso == "presenca" and acao == "visualizar": return True
+            if recurso == "chamada" and acao == "registrar": return True
         return False
-
-    def format_user_response(self, usuario: Usuario) -> UsuarioResponse:
-        return UsuarioResponse(
-            id=usuario.id,
-            nome=usuario.nome,
-            email=usuario.email,
-            tipo=usuario.tipo,
-            matricula=usuario.matricula,
-            registro_professor=usuario.registro_professor,
-            ativo=usuario.ativo,
-            data_cadastro=usuario.data_cadastro,
-            ultimo_acesso=usuario.ultimo_acesso
-        )

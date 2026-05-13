@@ -6,7 +6,7 @@ from typing import List, Optional
 from app.core.database import get_db
 from app.core.security import Security
 from app.models.Usuario import Usuario
-from app.schemas.usuario import TokenData
+from app.schemas.auth import TokenData
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 

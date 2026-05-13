@@ -1,0 +1,5 @@
+### 
+
+POST http://localhost:8000/api/v1/usuarios/5/activate HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJhZG1pbkBlbWFpbC5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3Nzg3MTY3MTR9.JB05F8saL8lGIwNELJtP3gxjoT0ICoMPEv280fEXcXI
