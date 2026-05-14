@@ -6,8 +6,11 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+    DEFAULT_RADIUS: float
+    MAX_RADIUS: float
+    BACKEND_CORS_ORIGINS: str
 
     class Config:
         env_file = ".env"
 
-settings = Settings()  # type: ignore[arg-type]
+settings = Settings()
