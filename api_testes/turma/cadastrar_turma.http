@@ -2,14 +2,14 @@
 
 POST http://localhost:8000/api/v1/turmas/ HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJhZG1pbkBlbWFpbC5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3Nzg2MzIxNzd9.-ESf7y-y3aDTdE3eXZ0Qf5bz3SZrp_80IXLbGaDKUsA
+Authorization: Bearer
 
 {
-  "ano": 2024,
-  "codigo": "BD505-B",
-  "data_fim": "2024-06-30",
-  "data_inicio": "2024-02-01",
-  "disciplina_id": 7,
-  "horario": "21:00:00",
-  "semestre": "2024.1"
+  "ano": ,
+  "codigo": "",
+  "data_fim": "",
+  "data_inicio": "",
+  "disciplina_id": ,
+  "horario": "",
+  "semestre": ""
 }

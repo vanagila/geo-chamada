@@ -2,10 +2,10 @@
 
 POST http://localhost:8000/api/v1/disciplinas/ HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJhZG1pbkBlbWFpbC5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3Nzg2MzI2ODB9.7qqwdaub4gLR1s7elLJuKTxGTHGTujhzwuX7zqOyMMA
+Authorization: Bearer
 
 {
-  "codigo": "ES606",
-  "descricao": "Metodologias ágeis, requisitos, design patterns, testes e gestão de projetos",
-  "nome": "Engenharia de Software"
+  "codigo": "",
+  "descricao": "",
+  "nome": ""
 }

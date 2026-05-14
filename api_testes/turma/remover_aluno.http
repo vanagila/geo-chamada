@@ -2,4 +2,4 @@
 
 DELETE http://localhost:8000/api/v1/turmas/2/alunos/4 HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJhZG1pbkBlbWFpbC5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3Nzg1NDU3MzZ9.9EpidzeqRViljUfUx1ikoiV_LJjDFWfyFcLxSZ4qeys
+Authorization: Bearer

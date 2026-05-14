@@ -2,4 +2,4 @@
 
 GET http://localhost:8000/api/v1/disciplinas/codigo/INF208 HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJhZG1pbkBlbWFpbC5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3Nzg2MzYwNjZ9.bRo7kjIC-NOnSOJpetjlbOny8MnvkK2nr0y61S-R-ZM
+Authorization: Bearer
