@@ -1,0 +1,9 @@
+### 
+
+PUT http://localhost:8000/api/v1/disciplinas/7 HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer
+
+{
+  "descricao": ""
+}

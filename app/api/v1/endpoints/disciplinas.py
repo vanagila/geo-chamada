@@ -68,4 +68,4 @@ def deletar_disciplina(
     current_user: Usuario = Depends(verificar_perfil(["ADMIN"]))
 ) -> Any:
     service = DisciplinaService(db)
-    return service.deletar_disciplina(disciplina_id)
+    return service.delete_disciplina(disciplina_id)

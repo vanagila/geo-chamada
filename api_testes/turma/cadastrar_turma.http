@@ -2,14 +2,14 @@
 
 POST http://localhost:8000/api/v1/turmas/ HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJhZG1pbkBlbWFpbC5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3Nzc5NDI5NTV9.WmhrfxytriQWSYUzJMU_575Rk0_Im66meZEwtCRvVko
+Authorization: Bearer
 
 {
-  "ano": 2026,
-  "codigo": "20262-SO-M2",
-  "data_fim": "2026-12-15",
-  "data_inicio": "2026-08-05",
-  "disciplina_id": 1,
-  "horario": "08:30:00",
-  "semestre": "2026.2"
+  "ano": ,
+  "codigo": "",
+  "data_fim": "",
+  "data_inicio": "",
+  "disciplina_id": ,
+  "horario": "",
+  "semestre": ""
 }

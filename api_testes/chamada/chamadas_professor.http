@@ -2,4 +2,4 @@
 
 GET http://localhost:8000/api/v1/chamadas/professor/2 HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwiZW1haWwiOiJwcm9mZXNzb3JsdWNhc0BlbWFpbC5jb20iLCJ0aXBvIjoiUFJPRkVTU09SIiwiZXhwIjoxNzc4MjA0MzE1fQ.7ji1uUXHBTMx4NfDQX-r3nLYK1awAtU4y2Gq3CyanS8
+Authorization: Bearer

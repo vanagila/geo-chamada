@@ -4,7 +4,7 @@ from typing import List, Any
 from app.core.database import get_db
 from app.api.deps import get_current_active_user, verificar_perfil
 from app.models.Usuario import Usuario
-from app.schemas.chamada import ChamadaCreate, ChamadaResponse
+from app.schemas.chamada import ChamadaCreate, ChamadaResponse, RelatorioChamadaResponse
 from app.services.chamada_service import ChamadaService
 
 router = APIRouter()
@@ -15,15 +15,8 @@ def criar_chamada(
     chamada_data: ChamadaCreate,
     current_user: Usuario = Depends(verificar_perfil(["PROFESSOR"]))
 ) -> Any:
-    chamada_service = ChamadaService(db)
-    try:
-        chamada = chamada_service.abrir_chamada(chamada_data, current_user.id)
-        return chamada
-    except ValueError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+    service = ChamadaService(db)
+    return service.abrir_chamada(chamada_data, current_user.id)
 
 @router.post("/{chamada_id}/encerrar", response_model=ChamadaResponse)
 def encerrar_chamada(
@@ -32,9 +25,9 @@ def encerrar_chamada(
     current_user: Usuario = Depends(verificar_perfil(["PROFESSOR"]))
 ) -> Any:
     service = ChamadaService(db)
-    return service.encerrar(chamada_id, current_user.id)
+    return service.encerrar_chamada(chamada_id, current_user.id)
 
-@router.get("/{chamada_id}/relatorio")
+@router.get("/{chamada_id}/relatorio", response_model=RelatorioChamadaResponse)
 def relatorio_presencas(
     *, chamada_id: int,
     db: Session = Depends(get_db),

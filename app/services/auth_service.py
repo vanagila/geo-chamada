@@ -1,16 +1,20 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
+from datetime import datetime
+from app.repositories.auth_repository import AuthRepository
 from app.repositories.usuario_repository import UsuarioRepository
 from app.schemas.usuario import UsuarioCreate
+from app.schemas.auth import Token
 from app.models.Usuario import Usuario
 from app.core.security import Security
 
 class AuthService:
     def __init__(self, db: Session):
         self.db = db
+        self.repository = AuthRepository(db)
         self.usuario_repo = UsuarioRepository(db)
 
-    def register_user(self, user_data: UsuarioCreate) -> Usuario:
+    def criar_usuario(self, user_data: UsuarioCreate) -> Usuario:
         if self.usuario_repo.get_by_email(user_data.email):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -30,20 +34,20 @@ class AuthService:
             )
 
         senha_hash = Security.get_senha_hash(user_data.senha)
-        novo_usuario = self.usuario_repo.create(user_data, senha_hash)
+        novo_usuario = Usuario(
+            nome=user_data.nome,
+            email=user_data.email,
+            senha_hash=senha_hash,
+            tipo=user_data.tipo,
+            matricula=user_data.matricula,
+            registro_professor=user_data.registro_professor
+        )
+        return self.repository.save(novo_usuario)
 
-        return novo_usuario
-
-    def authenticate_user(self, email: str, senha: str) -> Usuario:
+    def authenticate_usuario(self, email: str, senha: str) -> Usuario:
         usuario = self.usuario_repo.get_by_email(email)
 
-        if not usuario:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Email ou senha incorretos"
-            )
-
-        if not Security.verificar_senha(senha, usuario.senha_hash):
+        if not usuario or not Security.verificar_senha(senha, usuario.senha_hash):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Email ou senha incorretos"
@@ -55,10 +59,11 @@ class AuthService:
                 detail="Usuário inativo"
             )
 
-        self.usuario_repo.update_ultimo_acesso(usuario.id)
+        usuario.ultimo_acesso = datetime.utcnow()
+        self.usuario_repo.save(usuario)
         return usuario
 
-    def generate_token(self, usuario: Usuario) -> dict:
+    def generate_token(self, usuario: Usuario) -> Token:
         access_token = Security.criar_access_token(
             data={
                 "sub": str(usuario.id),
@@ -66,14 +71,6 @@ class AuthService:
                 "tipo": usuario.tipo.value
             }
         )
-
-        return {
-            "access_token": access_token,
-            "token_type": "bearer",
-            "usuario": {
-                "id": usuario.id,
-                "nome": usuario.nome,
-                "email": usuario.email,
-                "tipo": usuario.tipo.value
-            }
-        }
+        return Token(
+            access_token=access_token, token_type="bearer"
+        )

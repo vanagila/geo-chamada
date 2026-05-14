@@ -8,6 +8,7 @@ from app.models.Chamada import Chamada
 from app.repositories.presenca_repository import PresencaRepository
 from app.repositories.chamada_repository import ChamadaRepository
 from app.repositories.disciplina_repository import DisciplinaRepository
+from app.repositories.usuario_repository import UsuarioRepository
 from app.schemas.presenca import PresencaCreate, PresencaResponse, HistoricoAlunoDisciplinaResponse, EstatisticaResponse, DisciplinaResumo, AbonoResponse, AbonoDetailResponse
 from app.utils.geo import GeoUtils
 from app.utils.presenca_mapper import presenca_to_response
@@ -18,8 +19,9 @@ class PresencaService:
         self.repository = PresencaRepository(db)
         self.disciplina_repo = DisciplinaRepository(db)
         self.chamada_repo = ChamadaRepository(db)
+        self.usuario_repo = UsuarioRepository(db)
 
-    def marcar_presenca(self, aluno_id: int, presenca_data: PresencaCreate) -> Tuple[Presenca, bool]:
+    def marcar_presenca(self, aluno_id: int, presenca_data: PresencaCreate) -> PresencaResponse:
         chamada = self.chamada_repo.get_by_id(presenca_data.chamada_id)
         if not chamada:
             raise HTTPException(
@@ -32,9 +34,8 @@ class PresencaService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Chamada encerrada"
             )
-
-        aluno = self.db.query(Usuario).filter(
-            Usuario.id == aluno_id).first()
+ 
+        aluno = self.usuario_repo.get_by_id(aluno_id)
         if not aluno:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -62,18 +63,13 @@ class PresencaService:
             )
 
         ponto = GeoUtils.criar_ponto(latitude, longitude)
-
         distancia, dentro = self.repository.calcular_distancia(
             ponto,
             chamada.coordenadas_professor,
             chamada.raio
         )
 
-        situacao_presenca = (
-            PresencaStatus.PRESENTE
-            if dentro
-            else PresencaStatus.AUSENTE
-        )
+        situacao_presenca = PresencaStatus.PRESENTE if dentro else PresencaStatus.AUSENTE
 
         presenca = Presenca(
             aluno_id=aluno_id,
@@ -84,8 +80,8 @@ class PresencaService:
             data_registro=datetime.utcnow()
         )
 
-        presenca = self.repository.create(presenca)
-        return presenca, dentro
+        presenca_salva = self.repository.save(presenca)
+        return presenca_to_response(presenca_salva)
 
     def abonar_ausencia(self, professor_id: int, presenca_id: int, motivo: str) -> AbonoResponse:
         presenca = self.db.query(Presenca).filter(
@@ -108,18 +104,18 @@ class PresencaService:
                 detail="Não é possível abonar uma presença já confirmada"
             )
 
-        chamada = self.db.query(Chamada).filter(Chamada.id == presenca.chamada_id).first()
-        if chamada and chamada.professor_id != professor_id:
+        if presenca.chamada and presenca.chamada.professor_id != professor_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Você só pode abonar faltas das suas próprias chamadas"
             )
 
-        presenca_atualizada = self.repository.abonar(
-            presenca_id=presenca_id,
-            professor_id=professor_id,
-            motivo=motivo
-        )
+        presenca.status = PresencaStatus.ABONADA
+        presenca.abonado_por_id = professor_id
+        presenca.data_abono = datetime.utcnow()
+        presenca.motivo_abono = motivo
+
+        presenca_atualizada = self.repository.save(presenca)
 
         if not presenca_atualizada:
             raise HTTPException(
@@ -151,6 +147,10 @@ class PresencaService:
             )
         return [presenca_to_response(p) for p in presencas]
 
+    def presencas_chamada(self, chamada_id: int) -> List[PresencaResponse]:
+        presencas = self.repository.get_by_chamada(chamada_id)
+        return [presenca_to_response(p) for p in presencas]
+
     def historico_aluno(self, aluno_id: int) -> List[Presenca]:
         presencas = self.repository.historico_aluno(aluno_id)
         return [presenca_to_response(p) for p in presencas]
@@ -180,6 +180,40 @@ class PresencaService:
             )
         )
 
-    def presencas_chamada(self, chamada_id: int) -> List[PresencaResponse]:
-        presencas = self.repository.get_by_chamada(chamada_id)
-        return [presenca_to_response(p) for p in presencas]
+    def presenca_automatica(self, aluno_id: int, chamada_id: int, status: str) -> PresencaResponse:
+        chamada = self.chamada_repo.get_by_id(chamada_id)
+        if not chamada:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Chamada não encontrada"
+            )
+
+        if self.repository.verificar_duplicidade(aluno_id, chamada_id):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Presença já registrada"
+            )
+        status_upper = status.upper()
+        if status == "AUSENTE":
+            status_enum = PresencaStatus.AUSENTE
+        elif status == "PRESENTE":
+            status_enum = PresencaStatus.PRESENTE
+        elif status == "ABONADA":
+            status_enum = PresencaStatus.ABONADA
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Status de presença inválido"
+            )
+
+        presenca = Presenca(
+            aluno_id=aluno_id,
+            chamada_id=chamada_id,
+            coordenadas_aluno=None,
+            distancia_calculada=None,
+            data_registro=datetime.utcnow(),
+            status=status_enum
+        )
+
+        presenca_salva = self.repository.save(presenca)
+        return presenca_to_response(presenca_salva)

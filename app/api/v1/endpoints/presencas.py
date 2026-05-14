@@ -17,19 +17,7 @@ def registrar_presenca(
     current_user: Usuario = Depends(verificar_perfil(["ALUNO"]))
 ) -> Any:
     service = PresencaService(db)
-    presenca, dentro = service.marcar_presenca(
-        current_user.id,
-        presenca_data
-    )
-    return {
-        "id": presenca.id,
-        "aluno_id": presenca.aluno_id,
-        "chamada_id": presenca.chamada_id,
-        "distancia_calculada": presenca.distancia_calculada,
-        "data_registro": presenca.data_registro,
-        "status": presenca.status,
-        "dentro_raio": dentro
-    }
+    return service.marcar_presenca(current_user.id, presenca_data)
 
 @router.post("/abonar", response_model=AbonoResponse)
 def abonar_falta(

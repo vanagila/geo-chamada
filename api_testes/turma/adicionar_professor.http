@@ -1,5 +1,5 @@
 ### 
 
-POST http://localhost:8000/api/v1/turmas/1/professores/2 HTTP/1.1
+POST http://localhost:8000/api/v1/turmas/2/professores/2 HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJhZG1pbkBlbWFpbC5jb20iLCJ0aXBvIjoiQURNSU4iLCJleHAiOjE3Nzc5NDI5NTV9.WmhrfxytriQWSYUzJMU_575Rk0_Im66meZEwtCRvVko
+Authorization: Bearer

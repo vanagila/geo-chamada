@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from typing import Optional, List
 from fastapi import HTTPException, status
+from datetime import datetime
 from app.repositories.chamada_repository import ChamadaRepository
 from app.schemas.chamada import ChamadaCreate, ChamadaUpdate, ChamadaResponse
 from app.models.Chamada import Chamada, ChamadaStatus
@@ -8,6 +9,8 @@ from app.repositories.presenca_repository import PresencaRepository
 from app.repositories.turma_repository import TurmaRepository
 from app.models.Turma import Turma
 from app.utils.geo import GeoUtils
+from app.schemas.chamada import ChamadaResponse, ChamadaStatus, ChamadaCreate, ChamadaResumo, RelatorioChamadaResponse
+from app.schemas.presenca import EstatisticaResponse
 from app.utils.presenca_mapper import presenca_to_response
 from app.utils.chamada_mapper import chamada_to_response
 from geoalchemy2.shape import to_shape
@@ -19,8 +22,8 @@ class ChamadaService:
         self.presenca_repo = PresencaRepository(db)
         self.turma_repo = TurmaRepository(db)
 
-    def abrir_chamada(self, chamada_data: ChamadaCreate, professor_id: int):
-        turma = self.db.query(Turma).filter(Turma.id == chamada_data.turma_id).first()
+    def abrir_chamada(self, chamada_data: ChamadaCreate, professor_id: int) -> ChamadaResponse:
+        turma = self.turma_repo.get_by_id(chamada_data.turma_id)
         if not turma:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -34,18 +37,29 @@ class ChamadaService:
             )
 
         if not GeoUtils.validar_coordenadas(chamada_data.coordenadas.latitude, chamada_data.coordenadas.longitude):
-            raise ValueError("Coordenadas inválidas")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Coordenadas inválidas"
+            )
 
-        chamada = self.repository.create(chamada_data, professor_id)
+        ponto_geom = GeoUtils.criar_ponto(
+            chamada_data.coordenadas.latitude,
+            chamada_data.coordenadas.longitude
+        )
 
-        ponto_geom = to_shape(chamada.coordenadas_professor)
-        chamada.coordenadas_professor = {
-            "latitude": ponto_geom.y,
-            "longitude": ponto_geom.x
-        }
-        return chamada
+        nova_chamada = Chamada(
+            turma_id=chamada_data.turma_id,
+            professor_id=professor_id,
+            coordenadas_professor=ponto_geom,
+            raio=chamada_data.raio,
+            data_abertura=datetime.utcnow(),
+            status=ChamadaStatus.ABERTA
+        )
 
-    def encerrar(self, chamada_id: int, professor_id: int) -> ChamadaResponse:
+        chamada_salva = self.repository.save(nova_chamada)
+        return chamada_to_response(chamada_salva)
+
+    def encerrar_chamada(self, chamada_id: int, professor_id: int) -> ChamadaResponse:
         chamada = self.repository.get_by_id(chamada_id)
         if not chamada:
             raise HTTPException(
@@ -61,7 +75,7 @@ class ChamadaService:
 
         if chamada.professor_id != professor_id:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_403_FORBIDDEN,
                 detail="Apenas o professor que abriu a chamada pode encerrá-la"
             )
 
@@ -72,12 +86,17 @@ class ChamadaService:
                 detail="Turma não encontrada"
             )
 
+        chamada.status = ChamadaStatus.ENCERRADA
+        chamada.data_encerramento = datetime.utcnow()
+
+        from app.services.presenca_service import PresencaService
+        presenca_serv = PresencaService(self.db)
         for aluno in turma.alunos:
             presenca_existente = self.presenca_repo.verificar_duplicidade(aluno.id, chamada_id)
             if not presenca_existente:
-                self.presenca_repo.presenca_automatica(aluno_id=aluno.id, chamada_id=chamada_id, status="AUSENTE")
+                presenca_serv.presenca_automatica(aluno_id=aluno.id, chamada_id=chamada_id, status="AUSENTE")
 
-        chamada_atualizada = self.repository.encerrar(chamada)
+        chamada_atualizada = self.repository.save(chamada)
         return chamada_to_response(chamada_atualizada)
 
     def get_by_id(self, chamada_id: int) -> ChamadaResponse:
@@ -97,7 +116,7 @@ class ChamadaService:
         chamadas = self.repository.get_by_professor(professor_id, skip=skip, limit=limit)
         return [chamada_to_response(c) for c in chamadas]
 
-    def relatorio_chamada(self, chamada_id: int) -> dict:
+    def relatorio_chamada(self, chamada_id: int) -> RelatorioChamadaResponse:
         chamada = self.repository.get_by_id(chamada_id)
         if not chamada:
             raise HTTPException(
@@ -106,19 +125,20 @@ class ChamadaService:
             )
         presencas = self.presenca_repo.get_by_chamada(chamada_id)
         presencas_serializaveis = [presenca_to_response(p) for p in presencas]
-        return {
-            "chamada": {
-                "id": chamada.id,
-                "data_abertura": chamada.data_abertura,
-                "data_encerramento": chamada.data_encerramento,
-                "raio": chamada.raio,
-                "status": chamada.status
-            },
-            "presencas": presencas_serializaveis,
-            "estatisticas": {
-                "total": len(presencas),
-                "presentes": sum(1 for p in presencas if p.status.value == "PRESENTE"),
-                "ausentes": sum(1 for p in presencas if p.status.value == "AUSENTE"),
-                "abonadas": sum(1 for p in presencas if p.status.value == "ABONADA")
-            }
-        }
+        return RelatorioChamadaResponse(
+            chamada=ChamadaResumo(
+                id=chamada.id,
+                data_abertura=chamada.data_abertura,
+                data_encerramento=chamada.data_encerramento,
+                raio=chamada.raio,
+                status=chamada.status.value
+            ),
+            presencas=presencas_serializaveis,
+            estatisticas=EstatisticaResponse(
+                total=len(presencas),
+                presentes=sum(1 for p in presencas if p.status.value == "PRESENTE"),
+                ausentes=sum(1 for p in presencas if p.status.value == "AUSENTE"),
+                abonadas=sum(1 for p in presencas if p.status.value == "ABONADA")
+            )
+        )
+

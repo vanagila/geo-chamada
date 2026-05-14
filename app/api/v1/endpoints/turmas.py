@@ -17,8 +17,7 @@ def criar_turma(
     current_user: Usuario = Depends(verificar_perfil(["ADMIN"]))
 ) -> Any:
     service = TurmaService(db)
-    turma = service.create_turma(turma_data)
-    return turma
+    return service.create_turma(turma_data)
 
 @router.get("/", response_model=List[TurmaResponse])
 def listar_turmas(
@@ -93,7 +92,7 @@ def deletar_turma(
     return service.delete_turma(turma_id)
 
 @router.post("/{turma_id}/professores/{professor_id}", response_model=TurmaMessage)
-def adicionar_professor_turma(
+def add_professor_turma(
     *, db: Session = Depends(get_db),
     turma_id: int,
     professor_id: int,
@@ -104,7 +103,7 @@ def adicionar_professor_turma(
     return turma
 
 @router.delete("/{turma_id}/professores/{professor_id}", response_model=TurmaMessage)
-def remover_professor_turma(
+def remove_professor_turma(
     *, db: Session = Depends(get_db),
     turma_id: int,
     professor_id: int,
@@ -115,7 +114,7 @@ def remover_professor_turma(
     return turma
 
 @router.post("/{turma_id}/alunos/{aluno_id}", response_model=TurmaMessage)
-def adicionar_aluno_turma(
+def add_aluno_turma(
     *, db: Session = Depends(get_db),
     turma_id: int,
     aluno_id: int,
@@ -126,7 +125,7 @@ def adicionar_aluno_turma(
     return turma
 
 @router.delete("/{turma_id}/alunos/{aluno_id}", response_model=TurmaMessage)
-def remover_aluno_turma(
+def remove_aluno_turma(
     *, db: Session = Depends(get_db),
     turma_id: int,
     aluno_id: int,
