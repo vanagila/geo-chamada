@@ -5,7 +5,7 @@ class DisciplinaBase(BaseModel):
     nome: str = Field(..., min_length=3, max_length=100)
     codigo: str = Field(..., max_length=20)
     descricao: Optional[str] = Field(None, max_length=500)
-    carga_horaria: int = Field(60, ge=30, le=60, description="Carga horária em horas")
+    carga_horaria: int = Field(60, ge=30, le=240, description="Carga horária em horas")
 
 class DisciplinaCreate(DisciplinaBase):
     pass
