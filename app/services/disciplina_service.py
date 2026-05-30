@@ -26,7 +26,8 @@ class DisciplinaService:
         nova_disciplina = Disciplina(
             nome=disciplina.nome,
             codigo=disciplina.codigo,
-            descricao=disciplina.descricao
+            descricao=disciplina.descricao,
+            carga_horaria=disciplina.carga_horaria
         )
 
         disciplina_salva = self.repository.save(nova_disciplina)
