@@ -11,7 +11,7 @@ class ChamadaStatus(str, Enum):
 
 class ChamadaBase(BaseModel):
     turma_id: int
-    raio: float = Field(50.0, ge=10, le=50)
+    raio: float = Field(50.0, ge=10, le=150.0)
 
 class ChamadaCreate(ChamadaBase):
     coordenadas: Coordenadas
