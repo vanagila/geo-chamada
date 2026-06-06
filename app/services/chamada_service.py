@@ -116,6 +116,10 @@ class ChamadaService:
         chamadas = self.repository.get_by_professor(professor_id, skip=skip, limit=limit)
         return [chamada_to_response(c) for c in chamadas]
 
+    def get_ativas_by_professor(self, professor_id: int, skip: int = 0, limit: int = 100) -> List[ChamadaResponse]:
+        chamadas = self.repository.get_ativas_by_professor(professor_id, skip=skip, limit=limit)
+        return [chamada_to_response(c) for c in chamadas]
+
     def relatorio_chamada(self, chamada_id: int) -> RelatorioChamadaResponse:
         chamada = self.repository.get_by_id(chamada_id)
         if not chamada:

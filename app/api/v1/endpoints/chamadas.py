@@ -66,3 +66,14 @@ def get_by_professor(
 ) -> Any:
     service = ChamadaService(db)
     return service.get_by_professor(professor_id, skip, limit)
+
+@router.get("/professor/ativas/{professor_id}", response_model=List[ChamadaResponse])
+def get_ativas_by_professor(
+    *, db: Session = Depends(get_db),
+    professor_id: int,
+    skip: int = 0,
+    limit: int = 100,
+    current_user: Usuario = Depends(verificar_perfil(["PROFESSOR", "ADMIN"]))
+) -> Any:
+    service = ChamadaService(db)
+    return service.get_ativas_by_professor(professor_id, skip, limit)

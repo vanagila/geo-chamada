@@ -23,3 +23,8 @@ class ChamadaRepository:
 
     def get_by_professor(self, professor_id: int, skip: int = 0, limit: int = 100) -> List[Chamada]:
         return self.db.query(Chamada).filter(Chamada.professor_id == professor_id).offset(skip).limit(limit).all()
+
+    def get_ativas_by_professor(self, professor_id: int, skip: int = 0, limit: int = 100) -> List[Chamada]:
+        return self.db.query(Chamada).filter(
+            Chamada.professor_id == professor_id, Chamada.status == ChamadaStatus.ABERTA
+        ).order_by(Chamada.data_abertura.desc()).offset(skip).limit(limit).all()
