@@ -54,7 +54,7 @@ def turmas_por_professor(
     *, db: Session = Depends(get_db),
     professor_id: int,
     current_user: Usuario = Depends(get_current_active_user),
-    skip: int = 0, limit: int = 0
+    skip: int = 0, limit: int = 100
 ) -> Any:
     service = TurmaService(db)
     turmas = service.get_turmas_by_professor(professor_id, skip, limit)
@@ -65,7 +65,7 @@ def turmas_por_aluno(
     *, db: Session = Depends(get_db),
     aluno_id: int,
     current_user: Usuario = Depends(get_current_active_user),
-    skip: int = 0, limit: int = 0
+    skip: int = 0, limit: int = 100
 ) -> Any:
     service = TurmaService(db)
     turmas = service.get_turmas_by_aluno(aluno_id, skip, limit)

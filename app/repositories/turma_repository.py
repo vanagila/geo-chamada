@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session, joinedload
 from typing import Optional, List
-from app.models.Turma import Turma
+from app.models.Turma import Turma, turma_professor, turma_aluno
 from app.models.Usuario import Usuario
 from app.schemas.turma import TurmaCreate, TurmaUpdate
 
@@ -24,13 +24,17 @@ class TurmaRepository:
         ).offset(skip).limit(limit).all() 
 
     def get_by_professor(self, professor_id: int, skip: int = 0, limit: int = 100) -> List[Turma]:
-        return self.db.query(Turma).join(Turma.professores).filter(
-            Usuario.id == professor_id
+        return self.db.query(Turma).join(
+            turma_professor, Turma.id == turma_professor.c.turma_id
+        ).filter(
+            turma_professor.c.professor_id == professor_id
         ).offset(skip).limit(limit).all()
 
     def get_by_aluno(self, aluno_id: int, skip: int = 0, limit: int = 100) -> List[Turma]:
-        return self.db.query(Turma).join(Turma.alunos).filter(
-            Usuario.id == aluno_id
+        return self.db.query(Turma).join(
+            turma_aluno, Turma.id == turma_aluno.c.turma_id
+        ).filter(
+            turma_aluno.c.professor_id == aluno_id
         ).offset(skip).limit(limit).all()
 
     def save(self, turma: Turma) -> Turma:
