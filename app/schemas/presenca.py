@@ -21,6 +21,8 @@ class PresencaUpdate(BaseModel):
 class PresencaResponse(BaseModel):
     id: int
     aluno_id: int
+    nome: str
+    matricula: str
     chamada_id: int
     distancia_calculada: Optional[float]
     data_registro: datetime
