@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List
 from datetime import datetime
 from enum import Enum
-from app.schemas.presenca import PresencaResponse, EstatisticaResponse
+from app.schemas.presenca import PresencaRelatorioResponse, EstatisticaResponse
 from app.schemas.geo import Coordenadas
 
 class ChamadaStatus(str, Enum):
@@ -42,5 +42,5 @@ class ChamadaResumo(BaseModel):
 
 class RelatorioChamadaResponse(BaseModel):
     chamada: ChamadaResumo
-    presencas: List[PresencaResponse]
+    presencas: List[PresencaRelatorioResponse]
     estatisticas: EstatisticaResponse

@@ -18,11 +18,27 @@ class PresencaCreate(PresencaBase):
 class PresencaUpdate(BaseModel):
     status: Optional[PresencaStatus] = None
 
+class AlunoRelatorio(BaseModel):
+    id: int
+    nome: str
+    email: str
+    matricula: Optional[str] = None
+
 class PresencaResponse(BaseModel):
     id: int
     aluno_id: int
-    nome: str
-    matricula: str
+    chamada_id: int
+    distancia_calculada: Optional[float]
+    data_registro: datetime
+    status: PresencaStatus
+    dentro_raio: bool
+
+    class Config:
+        from_attributes = True
+
+class PresencaRelatorioResponse(BaseModel):
+    id: int
+    aluno: AlunoRelatorio
     chamada_id: int
     distancia_calculada: Optional[float]
     data_registro: datetime

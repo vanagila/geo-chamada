@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import Optional, List
 from datetime import datetime
 from sqlalchemy import func
@@ -67,3 +67,10 @@ class PresencaRepository:
             .limit(limit)
             .all()
         )
+
+    def get_chamada_com_aluno(self, chamada_id: int) -> List[Presenca]:
+        return self.db.query(Presenca).options(
+            joinedload(Presenca.aluno)
+        ).filter(
+            Presenca.chamada_id == chamada_id
+        ).all()

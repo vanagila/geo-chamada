@@ -12,6 +12,7 @@ from app.utils.geo import GeoUtils
 from app.schemas.chamada import ChamadaResponse, ChamadaStatus, ChamadaCreate, ChamadaResumo, RelatorioChamadaResponse
 from app.schemas.presenca import EstatisticaResponse
 from app.utils.presenca_mapper import presenca_to_response
+from app.utils.presenca_relatorio_mapper import presenca_to_relatorio_response
 from app.utils.chamada_mapper import chamada_to_response
 from geoalchemy2.shape import to_shape
 
@@ -127,8 +128,8 @@ class ChamadaService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Chamada não encontrada"
             )
-        presencas = self.presenca_repo.get_by_chamada(chamada_id)
-        presencas_serializaveis = [presenca_to_response(p) for p in presencas]
+        presencas = self.presenca_repo.get_chamada_com_aluno(chamada_id)
+        presencas_serializaveis = [presenca_to_relatorio_response(p) for p in presencas]
         return RelatorioChamadaResponse(
             chamada=ChamadaResumo(
                 id=chamada.id,
@@ -145,4 +146,3 @@ class ChamadaService:
                 abonadas=sum(1 for p in presencas if p.status.value == "ABONADA")
             )
         )
-
