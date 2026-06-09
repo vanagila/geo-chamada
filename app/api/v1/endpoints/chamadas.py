@@ -77,3 +77,11 @@ def get_ativas_by_professor(
 ) -> Any:
     service = ChamadaService(db)
     return service.get_ativas_by_professor(professor_id, skip, limit)
+
+@router.get("/aluno/ativa", response_model=ChamadaResponse)
+def get_ativa_by_aluno(
+    *, db: Session = Depends(get_db),
+    current_user: Usuario = Depends(verificar_perfil(["ALUNO"]))
+) -> Any:
+    service = ChamadaService(db)
+    return service.get_ativa_by_aluno(current_user.id)

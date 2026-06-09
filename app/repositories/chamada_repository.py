@@ -3,6 +3,8 @@ from typing import Optional, List
 from datetime import datetime
 from app.models.Chamada import Chamada, ChamadaStatus
 from app.schemas.chamada import ChamadaCreate
+from app.models.Usuario import Usuario
+from app.models.Turma import Turma
 from app.utils.geo import GeoUtils
 
 class ChamadaRepository:
@@ -28,3 +30,18 @@ class ChamadaRepository:
         return self.db.query(Chamada).filter(
             Chamada.professor_id == professor_id, Chamada.status == ChamadaStatus.ABERTA
         ).order_by(Chamada.data_abertura.desc()).offset(skip).limit(limit).all()
+
+    def get_ativa_by_aluno(self, aluno_id: int) -> Chamada:
+        aluno = self.db.query(Usuario).filter(Usuario.id == aluno_id).first()
+        if not aluno:
+            return None
+        
+        return self.db.query(Chamada).join(
+            Turma, Chamada.turma_id == Turma.id
+            ).join(
+            Turma.alunos
+        ).filter(
+            Usuario.id == aluno_id,
+            Chamada.status == ChamadaStatus.ABERTA
+        ).first()
+
