@@ -31,14 +31,14 @@ class ChamadaRepository:
             Chamada.professor_id == professor_id, Chamada.status == ChamadaStatus.ABERTA
         ).order_by(Chamada.data_abertura.desc()).offset(skip).limit(limit).all()
 
-    def get_ativa_by_aluno(self, aluno_id: int) -> Chamada:
+    def get_ativa_by_aluno(self, aluno_id: int) -> Optional[Chamada]:
         aluno = self.db.query(Usuario).filter(Usuario.id == aluno_id).first()
         if not aluno:
             return None
         
         return self.db.query(Chamada).join(
             Turma, Chamada.turma_id == Turma.id
-            ).join(
+        ).join(
             Turma.alunos
         ).filter(
             Usuario.id == aluno_id,

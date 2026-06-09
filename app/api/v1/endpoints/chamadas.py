@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List, Any
+from typing import List, Any, Optional
 from app.core.database import get_db
 from app.api.deps import get_current_active_user, verificar_perfil
 from app.models.Usuario import Usuario
@@ -78,7 +78,7 @@ def get_ativas_by_professor(
     service = ChamadaService(db)
     return service.get_ativas_by_professor(professor_id, skip, limit)
 
-@router.get("/aluno/ativa", response_model=ChamadaResponse)
+@router.get("/aluno/ativa", response_model=Optional[ChamadaResponse])
 def get_ativa_by_aluno(
     *, db: Session = Depends(get_db),
     current_user: Usuario = Depends(verificar_perfil(["ALUNO"]))

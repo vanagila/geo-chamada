@@ -1,8 +1,12 @@
 from geoalchemy2.shape import to_shape
+from typing import Optional
 from app.models.Chamada import Chamada
 from app.schemas.chamada import ChamadaResponse, Coordenadas
 
-def chamada_to_response(c: Chamada) -> ChamadaResponse: 
+def chamada_to_response(c: Optional[Chamada]) -> Optional[ChamadaResponse]: 
+    if c is None:
+        return None
+
     if not c.coordenadas_professor:
         lat, lon = 0.0, 0.0
     else:
