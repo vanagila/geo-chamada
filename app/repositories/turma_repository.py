@@ -34,7 +34,7 @@ class TurmaRepository:
         return self.db.query(Turma).join(
             turma_aluno, Turma.id == turma_aluno.c.turma_id
         ).filter(
-            turma_aluno.c.professor_id == aluno_id
+            turma_aluno.c.aluno_id == aluno_id
         ).offset(skip).limit(limit).all()
 
     def save(self, turma: Turma) -> Turma:
