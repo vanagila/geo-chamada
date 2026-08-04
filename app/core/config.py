@@ -9,7 +9,12 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     DEFAULT_RADIUS: float
     MAX_RADIUS: float
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:5173"]
+    BACKEND_CORS_ORIGINS: str = "http://localhost:5173"
+
+    @property
+    def cors_origins_list(self) -> List[str]:
+        """Converte a string do .env em lista."""
+        return [origin.strip() for origin in self.BACKEND_CORS_ORIGINS.split(",")]
 
     class Config:
         env_file = ".env"
