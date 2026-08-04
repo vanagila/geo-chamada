@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     DEFAULT_RADIUS: float
     MAX_RADIUS: float
-    BACKEND_CORS_ORIGINS: str
+    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:5173"]
 
     class Config:
         env_file = ".env"
